@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Utilisateur {
+  id            String    @id @default(uuid())
+  nom           String
+  prenom        String
+  email         String    @unique
+  motDePasse    String
+  telephone     String?
+  dateNaissance DateTime?
+  cni           String?   @unique
+  demandes      Demande[]
+  createdAt     DateTime  @default(now())
+}
+
+model AdminMairie {
+  id         String   @id @default(uuid())
+  nom        String
+  prenom     String
+  codeUnique String   @unique
+  motDePasse String
+  role       String   @default("gestionnaire")
+  createdAt  DateTime @default(now())
+}
+
+model Demande {
+  id                String    @id @default(uuid())
+  utilisateurId     String
+  utilisateur       Utilisateur @relation(fields: [utilisateurId], references: [id])
+  typeActe          String
+  statut            String    @default("EN_ATTENTE")
+  donnees           Json
+  raisonRejet       String?
+  dateRendezVous    DateTime?
+  dateDisponibilite DateTime?
+  verificationIA    Json?
+  documents         Document[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Document {
+  id        String  @id @default(uuid())
+  demandeId String
+  demande   Demande @relation(fields: [demandeId], references: [id])
+  nom       String
+  url       String
+  type      String
+}
