@@ -5,8 +5,6 @@ import Inscription from './pages/citoyen/Inscription';
 import Connexion from './pages/citoyen/Connexion';
 import Dashboard from './pages/citoyen/Dashboard';
 import Demande from './pages/citoyen/Demande';
-import ConnexionAdmin from './pages/admin/ConnexionAdmin';
-import DashboardAdmin from './pages/admin/DashboardAdmin';
 
 function App() {
   return (
@@ -18,8 +16,6 @@ function App() {
           <Route path="/connexion" element={<Connexion />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/demande" element={<Demande />} />
-          <Route path="/admin/connexion" element={<ConnexionAdmin />} />
-          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
