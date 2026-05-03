@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const demandesRoutes = require('./routes/demandes');
 const adminRoutes = require('./routes/admin');
 const documentsRoutes = require('./routes/documents');
+const iaRoutes = require('./routes/ia');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/demandes', demandesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/documents', documentsRoutes);
+app.use('/api/ia', iaRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API Portail Mairie Douala fonctionne !' });
