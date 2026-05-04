@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FileText, HelpCircle, Search, ChevronDown, PlusCircle, Download } from 'lucide-react';
+import { FileText, HelpCircle, Search, ChevronDown } from 'lucide-react';
+import Navbar from '../../components/Navbar';
 
 const faqs = {
   FAQ: [
@@ -10,11 +10,11 @@ const faqs = {
   ],
   Documents: [
     { q: 'Quels formats de documents sont acceptés ?', r: 'Nous acceptons les formats PDF, JPG et PNG. Chaque fichier ne doit pas dépasser 5MB.' },
-    { q: 'Mes documents sont-ils sécurisés ?', r: 'Oui, tous vos documents sont chiffrés et stockés de manière sécurisée conformément à la réglementation.' },
+    { q: 'Mes documents sont-ils sécurisés ?', r: 'Oui, tous vos documents sont chiffrés et stockés de manière sécurisée.' },
   ],
   'Tarifs & Délais': [
     { q: 'Les demandes en ligne sont-elles payantes ?', r: 'La plateforme est gratuite. Certains actes peuvent nécessiter le paiement de frais administratifs à la mairie.' },
-    { q: 'Quel est le délai de traitement ?', r: 'Le délai varie selon le type d\'acte : de 3 à 15 jours ouvrables selon la complexité de la demande.' },
+    { q: 'Quel est le délai de traitement ?', r: 'Le délai varie selon le type d\'acte : de 3 à 15 jours ouvrables.' },
   ],
   Contacts: [
     { q: 'Comment contacter la mairie ?', r: 'Par téléphone au +237 233 42 66 00, par email à contact@douala.cm, ou en personne à l\'Hôtel de Ville.' },
@@ -32,27 +32,7 @@ export default function Aide() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-100 px-6 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-green-600 rounded-lg flex items-center justify-center">
-            <FileText size={18} color="white" />
-          </div>
-          <div>
-            <p className="font-bold text-gray-900 leading-tight">e-Mairie Douala</p>
-            <p className="text-xs text-gray-500">Ville de Douala</p>
-          </div>
-        </div>
-        <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-          <Link to="/" className="hover:text-green-700">Accueil</Link>
-          <Link to="/demande" className="flex items-center gap-1 hover:text-green-700"><PlusCircle size={15}/> Nouvelle Demande</Link>
-          <Link to="/dashboard" className="hover:text-green-700">Mes Demandes</Link>
-          <Link to="/recuperer-acte" className="flex items-center gap-1 hover:text-green-700"><Download size={15}/> Récupérer Acte</Link>
-          <Link to="/aide" className="flex items-center gap-1 text-green-700 font-semibold"><HelpCircle size={15}/> Aide</Link>
-        </div>
-        <Link to="/connexion" className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
-          Se connecter
-        </Link>
-      </nav>
+      <Navbar />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <div className="text-center mb-8">
@@ -60,7 +40,9 @@ export default function Aide() {
             <HelpCircle size={28} className="text-green-600" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Centre d'Aide</h1>
-          <p className="text-gray-500">Trouvez des réponses à vos questions sur les services de la plateforme e-Mairie Douala</p>
+          <p className="text-gray-500">
+            Trouvez des réponses à vos questions sur les services de la plateforme e-Mairie Douala
+          </p>
         </div>
 
         {/* Onglets */}

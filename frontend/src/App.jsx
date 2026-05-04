@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Accueil from './pages/Accueil';
 import Inscription from './pages/citoyen/Inscription';
 import Connexion from './pages/citoyen/Connexion';
@@ -18,10 +19,10 @@ function App() {
           <Route path="/" element={<Accueil />} />
           <Route path="/inscription" element={<Inscription />} />
           <Route path="/connexion" element={<Connexion />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/demande" element={<Demande />} />
-          <Route path="/recuperer-acte" element={<RecupererActe />} />
           <Route path="/aide" element={<Aide />} />
+          <Route path="/recuperer-acte" element={<RecupererActe />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/demande" element={<ProtectedRoute><Demande /></ProtectedRoute>} />
           <Route path="/admin/connexion" element={<ConnexionAdmin />} />
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
         </Routes>

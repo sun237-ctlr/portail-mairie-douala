@@ -10,11 +10,14 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const inscription = (data) => API.post('/auth/inscription', data);
+export const inscription = (formData) => API.post('/auth/inscription', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
 export const connexion = (data) => API.post('/auth/connexion', data);
 export const connexionAdmin = (data) => API.post('/auth/admin/connexion', data);
 export const getMesDemandes = () => API.get('/demandes/mes-demandes');
 export const creerDemande = (data) => API.post('/demandes', data);
+export const verifierParCode = (code) => API.get(`/demandes/verifier/${code}`);
 export const uploadDocuments = (demandeId, formData) =>
   API.post(`/documents/${demandeId}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
