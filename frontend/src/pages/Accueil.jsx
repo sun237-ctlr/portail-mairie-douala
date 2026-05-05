@@ -1,11 +1,11 @@
-
 import { Link } from 'react-router-dom';
 import AssistantIA from '../components/AssistantIA';
 import {
-  Baby, Heart, Cross, Home, Flag, FileCheck,
-  Activity, MapPin, Scale, Users, FileText,
-  Clock, Shield, Smartphone, LayoutDashboard,
-  PlusCircle, FolderOpen, Download, HelpCircle
+  FileText, Baby, Heart, Cross, Home, Flag,
+  CheckSquare, Scale, MapPin, Users, Clock,
+  Shield, Smartphone, LayoutDashboard, PlusCircle,
+  FolderOpen, Download, HelpCircle, Facebook,
+  Twitter, Instagram, FileCheck, Activity
 } from 'lucide-react';
 
 const services = [
@@ -27,6 +27,13 @@ const arrondissements = [
   'Douala 5e (Kotto)', 'Douala 6e (Bassa)',
 ];
 
+const etapes = [
+  { step: '1', Icon: PlusCircle, title: 'Créez un compte', desc: 'Inscrivez-vous gratuitement en quelques minutes' },
+  { step: '2', Icon: FileText, title: 'Choisissez votre acte', desc: 'Sélectionnez parmi nos 10 actes disponibles' },
+  { step: '3', Icon: Download, title: 'Joignez vos documents', desc: 'Scannez ou photographiez vos pièces justificatives' },
+  { step: '4', Icon: CheckSquare, title: 'Récupérez votre acte', desc: 'Venez chercher votre acte à la mairie au rendez-vous' },
+];
+
 export default function Accueil() {
   return (
     <div className="min-h-screen bg-white">
@@ -41,29 +48,29 @@ export default function Accueil() {
             <p className="text-xs text-gray-500">Ville de Douala</p>
           </div>
         </div>
-        <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-          <a href="#" className="flex items-center gap-1 text-green-700 font-medium">
+        <div className="hidden md:flex items-center gap-5 text-sm text-gray-600">
+          <Link to="/" className="flex items-center gap-1.5 text-green-700 font-medium">
             <LayoutDashboard size={15} /> Accueil
-          </a>
-          <Link to="/demande" className="flex items-center gap-1 hover:text-green-700">
+          </Link>
+          <Link to="/inscription" className="flex items-center gap-1.5 hover:text-green-700">
             <PlusCircle size={15} /> Nouvelle Demande
           </Link>
-          <Link to="/dashboard" className="flex items-center gap-1 hover:text-green-700">
+          <Link to="/dashboard" className="flex items-center gap-1.5 hover:text-green-700">
             <FolderOpen size={15} /> Mes Demandes
           </Link>
-          <a href="#" className="flex items-center gap-1 hover:text-green-700">
+          <Link to="/recuperer-acte" className="flex items-center gap-1.5 hover:text-green-700">
             <Download size={15} /> Récupérer Acte
-          </a>
-          <a href="#" className="flex items-center gap-1 hover:text-green-700">
+          </Link>
+          <Link to="/aide" className="flex items-center gap-1.5 hover:text-green-700">
             <HelpCircle size={15} /> Aide
-          </a>
+          </Link>
         </div>
         <Link to="/connexion"
           className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
           Se connecter
         </Link>
       </nav>
-   
+
       {/* HERO */}
       <div className="relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 40%, #a3e635 100%)' }}>
@@ -76,19 +83,19 @@ export default function Accueil() {
               Demandez vos actes<br />administratifs<br />en ligne
             </h1>
             <p className="text-green-100 text-lg mb-8 max-w-lg">
-              Un portail moderne et sécurisé pour faciliter vos démarches administratives auprès des mairies de Douala. Simple, rapide et accessible 24h/24.
+              Un portail moderne et sécurisé pour faciliter vos démarches administratives. Simple, rapide et accessible 24h/24.
             </p>
             <div className="flex gap-4">
               <Link to="/inscription"
                 className="bg-white text-green-700 font-bold px-6 py-3 rounded-lg hover:bg-green-50 transition flex items-center gap-2">
-                Faire une demande →
+                Faire une demande <PlusCircle size={16} />
               </Link>
               <Link to="/connexion"
                 className="border border-white text-white px-6 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                 Se connecter
               </Link>
             </div>
-        <div className="flex gap-8 mt-10">
+            <div className="flex gap-8 mt-10">
               {[
                 { Icon: Clock, label: '24h/24', desc: 'Service accessible à tout moment' },
                 { Icon: Shield, label: 'Sécurisé', desc: 'Données protégées' },
@@ -108,11 +115,22 @@ export default function Accueil() {
           {/* Card démo */}
           <div className="flex-1 max-w-md w-full">
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <p className="font-bold text-gray-800 mb-4">🚀 Commencer rapidement</p>
+              <p className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <FileText size={18} className="text-green-600" /> Commencer rapidement
+              </p>
               <div className="space-y-3">
-                {['Acte de naissance', 'Certificat de résidence', 'Acte de mariage'].map((item) => (
-                  <div key={item} className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
-                    <span className="text-sm text-gray-700">{item}</span>
+                {[
+                  { Icon: Baby, label: 'Acte de naissance', couleur: 'bg-blue-100 text-blue-600' },
+                  { Icon: Home, label: 'Certificat de résidence', couleur: 'bg-green-100 text-green-600' },
+                  { Icon: Heart, label: 'Acte de mariage', couleur: 'bg-pink-100 text-pink-600' },
+                ].map(({ Icon, label, couleur }) => (
+                  <div key={label} className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${couleur}`}>
+                        <Icon size={15} />
+                      </div>
+                      <span className="text-sm text-gray-700">{label}</span>
+                    </div>
                     <span className="text-green-600 text-xs font-semibold bg-green-50 px-2 py-1 rounded-full">En ligne</span>
                   </div>
                 ))}
@@ -125,7 +143,7 @@ export default function Accueil() {
           </div>
         </div>
 
-        {/* Vague blanche en bas */}
+        {/* Vague */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 60L1440 60L1440 30C1200 0 960 60 720 30C480 0 240 60 0 30L0 60Z" fill="white"/>
@@ -141,7 +159,7 @@ export default function Accueil() {
             Accédez à l'ensemble des services administratifs des mairies de Douala en quelques clics
           </p>
         </div>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {services.map(({ Icon, couleur, label, desc, key }) => (
             <Link to="/inscription" key={key}
               className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md hover:border-green-200 transition group">
@@ -152,7 +170,7 @@ export default function Accueil() {
               <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
             </Link>
           ))}
-        </div>  
+        </div>
       </div>
 
       {/* ARRONDISSEMENTS */}
@@ -163,7 +181,7 @@ export default function Accueil() {
             {arrondissements.map((arr) => (
               <div key={arr}
                 className="bg-white rounded-xl px-5 py-4 flex items-center gap-3 border border-gray-100 hover:border-green-300 hover:shadow-sm transition cursor-pointer">
-                <span className="text-green-600">📍</span>
+                <MapPin size={16} className="text-green-600 flex-shrink-0" />
                 <span className="text-sm font-medium text-gray-700">{arr}</span>
               </div>
             ))}
@@ -177,23 +195,20 @@ export default function Accueil() {
         </div>
       </div>
 
-      {/* COMMENT ÇA MARCHE */}
+      {/* COMMENT CA MARCHE */}
       <div className="max-w-5xl mx-auto px-6 py-16">
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-10">Comment ça marche ?</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-          {[
-            { step: '1', icon: '📝', title: 'Créez un compte', desc: 'Inscrivez-vous gratuitement en quelques minutes' },
-            { step: '2', icon: '📋', title: 'Choisissez votre acte', desc: 'Sélectionnez parmi nos 10 actes disponibles' },
-            { step: '3', icon: '📎', title: 'Joignez vos documents', desc: 'Scannez ou photographiez vos pièces justificatives' },
-            { step: '4', icon: '🏛️', title: 'Récupérez votre acte', desc: 'Venez chercher votre acte à la mairie au rendez-vous' },
-          ].map((item) => (
-            <div key={item.step} className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mb-3 text-sm">
-                {item.step}
+          {etapes.map(({ step, Icon, title, desc }) => (
+            <div key={step} className="flex flex-col items-center">
+              <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mb-4 text-sm">
+                {step}
               </div>
-              <div className="text-3xl mb-3">{item.icon}</div>
-              <p className="font-semibold text-gray-800 mb-1">{item.title}</p>
-              <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
+              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-3">
+                <Icon size={22} className="text-green-600" />
+              </div>
+              <p className="font-semibold text-gray-800 mb-1">{title}</p>
+              <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
@@ -205,7 +220,7 @@ export default function Accueil() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm">📋</span>
+                <FileText size={16} color="white" />
               </div>
               <p className="font-bold text-white">e-Mairie Douala</p>
             </div>
@@ -225,9 +240,9 @@ export default function Accueil() {
           <div>
             <p className="font-semibold text-white mb-3">Contact</p>
             <div className="space-y-2 text-sm">
-              <p>📍 Hôtel de Ville, Douala, Cameroun</p>
-              <p>📞 +237 233 42 66 00</p>
-              <p>✉️ contact@douala.cm</p>
+              <div className="flex items-center gap-2"><MapPin size={13} /> Hôtel de Ville, Douala</div>
+              <div className="flex items-center gap-2"><Smartphone size={13} /> +237 233 42 66 00</div>
+              <div className="flex items-center gap-2"><FileText size={13} /> contact@douala.cm</div>
             </div>
           </div>
           <div>
@@ -235,16 +250,18 @@ export default function Accueil() {
             <div className="space-y-2 text-sm">
               <p>Lundi - Vendredi</p>
               <p>7h30 - 15h30</p>
-              <p className="text-green-400 font-semibold">Service en ligne 24h/24, 7j/7</p>
+              <p className="text-green-400 font-semibold flex items-center gap-1">
+                <Clock size={13} /> Service en ligne 24h/24
+              </p>
             </div>
           </div>
         </div>
         <div className="max-w-6xl mx-auto border-t border-gray-800 mt-8 pt-6 flex justify-between items-center text-sm">
           <p>© 2026 Communauté Urbaine de Douala. Tous droits réservés.</p>
           <div className="flex gap-4">
-            <span className="cursor-pointer hover:text-white">Facebook</span>
-            <span className="cursor-pointer hover:text-white">Twitter</span>
-            <span className="cursor-pointer hover:text-white">Instagram</span>
+            <Facebook size={18} className="hover:text-white cursor-pointer" />
+            <Twitter size={18} className="hover:text-white cursor-pointer" />
+            <Instagram size={18} className="hover:text-white cursor-pointer" />
           </div>
         </div>
       </footer>
@@ -253,3 +270,4 @@ export default function Accueil() {
     </div>
   );
 }
+
