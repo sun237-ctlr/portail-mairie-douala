@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { connexion } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { FileText, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { FileText, Mail, Lock, Eye, EyeOff, CheckCircle, Clock, CheckSquare } from 'lucide-react';
 
 export default function Connexion() {
   const navigate = useNavigate();
@@ -51,15 +51,18 @@ export default function Connexion() {
           <p className="text-green-100 mb-8">
             Connectez-vous pour accéder à vos demandes et suivre leur avancement en temps réel.
           </p>
-          <div className="bg-white bg-opacity-10 rounded-2xl p-5 space-y-3">
+         
+         <div className="bg-white bg-opacity-10 rounded-2xl p-5 space-y-3">
             {[
-              { statut: '✅ Acceptée', acte: 'Acte de naissance' },
-              { statut: '⏳ En attente', acte: 'Certificat de résidence' },
-              { statut: '🎉 Disponible', acte: 'Certificat de vie' },
-            ].map((item) => (
-              <div key={item.acte} className="flex justify-between items-center bg-white bg-opacity-10 rounded-xl px-4 py-3">
-                <span className="text-sm text-white">{item.acte}</span>
-                <span className="text-xs text-green-200">{item.statut}</span>
+              { Icon: CheckCircle, couleur: 'text-green-300', statut: 'Acceptée', acte: 'Acte de naissance' },
+              { Icon: Clock, couleur: 'text-yellow-300', statut: 'En attente', acte: 'Certificat de résidence' },
+              { Icon: CheckSquare, couleur: 'text-blue-300', statut: 'Disponible', acte: 'Certificat de vie' },
+            ].map(({ Icon, couleur, statut, acte }) => (
+              <div key={acte} className="flex justify-between items-center bg-white bg-opacity-10 rounded-xl px-4 py-3">
+                <span className="text-sm text-white">{acte}</span>
+                <div className={`flex items-center gap-1.5 text-xs font-medium ${couleur}`}>
+                  <Icon size={13} /> {statut}
+                </div>
               </div>
             ))}
           </div>

@@ -1,11 +1,20 @@
 import { Link } from 'react-router-dom';
 import AssistantIA from '../components/AssistantIA';
-import {
+/*import {
   FileText, Baby, Heart, Cross, Home, Flag,
   CheckSquare, Scale, MapPin, Users, Clock,
   Shield, Smartphone, LayoutDashboard, PlusCircle,
   FolderOpen, Download, HelpCircle, Facebook,
   Twitter, Instagram, FileCheck, Activity
+} from 'lucide-react';
+*/
+
+import {
+  FileText, Baby, Heart, Cross, Home, Flag,
+  CheckSquare, Scale, MapPin, Users, Clock,
+  Shield, Smartphone, LayoutDashboard, PlusCircle,
+  FolderOpen, Download, HelpCircle, FileCheck,
+  Activity, Share2, Mail
 } from 'lucide-react';
 
 const services = [
@@ -259,9 +268,9 @@ export default function Accueil() {
         <div className="max-w-6xl mx-auto border-t border-gray-800 mt-8 pt-6 flex justify-between items-center text-sm">
           <p>© 2026 Communauté Urbaine de Douala. Tous droits réservés.</p>
           <div className="flex gap-4">
-            <Facebook size={18} className="hover:text-white cursor-pointer" />
-            <Twitter size={18} className="hover:text-white cursor-pointer" />
-            <Instagram size={18} className="hover:text-white cursor-pointer" />
+            <Share2 size={18} className="hover:text-white cursor-pointer" />
+            <Share2 size={18} className="hover:text-white cursor-pointer" />
+            <Share2 size={18} className="hover:text-white cursor-pointer" />
           </div>
         </div>
       </footer>

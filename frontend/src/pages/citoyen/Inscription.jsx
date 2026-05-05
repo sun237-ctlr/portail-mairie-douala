@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { inscription } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { FileText, User, Mail, Phone, Lock, Eye, EyeOff, Camera, Upload, CheckCircle } from 'lucide-react';
+import { FileText, User, Mail, Phone, Lock, Eye, EyeOff, Camera, Upload, CheckCircle, Shield, Key, QrCode } from 'lucide-react';
 
 function UploadCNI({ label, name, onChange, preview }) {
   return (
@@ -94,16 +94,19 @@ export default function Inscription() {
         <div>
           <h2 className="text-3xl font-bold mb-4 leading-tight">Inscription sécurisée</h2>
           <p className="text-green-100 mb-6">Votre CNI est requise pour garantir l'authenticité de vos demandes administratives.</p>
+         
           <div className="space-y-3">
             {[
-              { icon: '🔒', text: 'CNI recto/verso obligatoire' },
-              { icon: '🔑', text: 'Code unique pour chaque demande' },
-              { icon: '📱', text: 'QR code envoyé par email' },
-              { icon: '✅', text: 'Vérification possible sans connexion' },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-3">
-                <span className="text-xl">{item.icon}</span>
-                <span className="text-green-100 text-sm">{item.text}</span>
+              { Icon: Shield, text: 'CNI recto/verso obligatoire' },
+              { Icon: Key, text: 'Code unique pour chaque demande' },
+              { Icon: QrCode, text: 'QR code envoyé par email' },
+              { Icon: CheckCircle, text: 'Vérification possible sans connexion' },
+            ].map(({ Icon, text }) => (
+              <div key={text} className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Icon size={16} color="white" />
+                </div>
+                <span className="text-green-100 text-sm">{text}</span>
               </div>
             ))}
           </div>

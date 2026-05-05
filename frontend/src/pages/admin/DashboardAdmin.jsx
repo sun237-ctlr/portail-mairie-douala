@@ -2,23 +2,18 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDemandesAdmin, accepterDemande, rejeterDemande } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import {
+  FileText, LogOut, CheckCircle, XCircle, Clock,
+  User, ChevronDown, Building2, Check, X, Calendar
+} from 'lucide-react';
 
-const statutColors = {
-  EN_ATTENTE: 'bg-yellow-100 text-yellow-800',
-  VERIFICATION_EN_COURS: 'bg-blue-100 text-blue-800',
-  ACCEPTE: 'bg-green-100 text-green-800',
-  REJETE: 'bg-red-100 text-red-800',
-  RENDEZ_VOUS_PROGRAMME: 'bg-purple-100 text-purple-800',
-  ACTE_DISPONIBLE: 'bg-teal-100 text-teal-800',
-};
-
-const statutLabels = {
-  EN_ATTENTE: '⏳ En attente',
-  VERIFICATION_EN_COURS: '🔍 En vérification',
-  ACCEPTE: '✅ Accepté',
-  REJETE: '❌ Rejeté',
-  RENDEZ_VOUS_PROGRAMME: '📅 RDV programmé',
-  ACTE_DISPONIBLE: '🎉 Disponible',
+const statutConfig = {
+  EN_ATTENTE: { label: 'En attente', couleur: 'bg-yellow-100 text-yellow-800', Icon: Clock },
+  VERIFICATION_EN_COURS: { label: 'En vérification', couleur: 'bg-blue-100 text-blue-800', Icon: Clock },
+  ACCEPTE: { label: 'Accepté', couleur: 'bg-green-100 text-green-800', Icon: CheckCircle },
+  REJETE: { label: 'Rejeté', couleur: 'bg-red-100 text-red-800', Icon: XCircle },
+  RENDEZ_VOUS_PROGRAMME: { label: 'RDV programmé', couleur: 'bg-purple-100 text-purple-800', Icon: Calendar },
+  ACTE_DISPONIBLE: { label: 'Disponible', couleur: 'bg-teal-100 text-teal-800', Icon: CheckCircle },
 };
 
 export default function DashboardAdmin() {
@@ -33,6 +28,7 @@ export default function DashboardAdmin() {
   const [dateRdv, setDateRdv] = useState('');
   const [dateDispo, setDateDispo] = useState('');
   const [message, setMessage] = useState('');
+  const [demandesOuvertes, setDemandesOuvertes] = useState({});
 
   useEffect(() => {
     if (!admin) { navigate('/admin/connexion'); return; }
@@ -54,16 +50,13 @@ export default function DashboardAdmin() {
 
   const handleAccepter = async () => {
     try {
-      await accepterDemande(demandeSelectionnee.id, {
-        dateRendezVous: dateRdv,
-        dateDisponibilite: dateDispo
-      });
-      setMessage('✅ Demande acceptée avec succès');
+      await accepterDemande(demandeSelectionnee.id, { dateRendezVous: dateRdv, dateDisponibilite: dateDispo });
+      setMessage('Demande acceptée avec succès');
       setModal(null);
       setDemandeSelectionnee(null);
       chargerDemandes();
-    } catch (err) {
-      setMessage('❌ Erreur lors de l\'acceptation');
+    } catch {
+      setMessage('Erreur lors de l\'acceptation');
     }
   };
 
@@ -76,137 +69,163 @@ export default function DashboardAdmin() {
       setDemandeSelectionnee(null);
       setRaisonRejet('');
       chargerDemandes();
-    } catch (err) {
-      setMessage('❌ Erreur lors du rejet');
+    } catch {
+      setMessage('Erreur lors du rejet');
     }
   };
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const toggleDemande = (id) => setDemandesOuvertes(prev => ({ ...prev, [id]: !prev[id] }));
+
+  const filtres = [
+    { value: '', label: 'Toutes' },
+    { value: 'EN_ATTENTE', label: 'En attente', Icon: Clock },
+    { value: 'ACCEPTE', label: 'Accepté', Icon: CheckCircle },
+    { value: 'REJETE', label: 'Rejeté', Icon: XCircle },
+    { value: 'ACTE_DISPONIBLE', label: 'Disponible', Icon: CheckCircle },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <span className="text-xl">🏛️</span>
+          <Building2 size={22} className="text-green-400" />
           <div>
             <p className="font-bold">Mairie de Douala — Admin</p>
             <p className="text-gray-400 text-xs">Agent : {admin?.nom} {admin?.prenom}</p>
           </div>
         </div>
-        <button onClick={handleLogout}
-          className="text-sm border border-gray-600 px-3 py-1 rounded-lg hover:bg-gray-800">
-          Déconnexion
+        <button onClick={() => { logout(); navigate('/'); }}
+          className="flex items-center gap-2 text-sm border border-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-800 transition">
+          <LogOut size={14} /> Déconnexion
         </button>
       </nav>
 
       <div className="max-w-6xl mx-auto py-8 px-4">
+        {/* Message */}
         {message && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 mb-4 text-sm">
-            {message}
-            <button onClick={() => setMessage('')} className="ml-4 text-green-500">✕</button>
+          <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4 text-sm flex justify-between items-center">
+            <div className="flex items-center gap-2"><CheckCircle size={16} /> {message}</div>
+            <button onClick={() => setMessage('')}><X size={14} /></button>
           </div>
         )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'Total', count: demandes.length, color: 'bg-white' },
-            { label: 'En attente', count: demandes.filter(d => d.statut === 'EN_ATTENTE').length, color: 'bg-yellow-50' },
-            { label: 'Acceptées', count: demandes.filter(d => d.statut === 'ACCEPTE').length, color: 'bg-green-50' },
-            { label: 'Rejetées', count: demandes.filter(d => d.statut === 'REJETE').length, color: 'bg-red-50' },
-          ].map((stat) => (
-            <div key={stat.label} className={`${stat.color} rounded-xl p-4 text-center shadow-sm`}>
-              <p className="text-2xl font-bold text-gray-800">{stat.count}</p>
-              <p className="text-xs text-gray-600 mt-1">{stat.label}</p>
+            { label: 'Total', count: demandes.length, Icon: FileText, couleur: 'bg-white text-gray-700' },
+            { label: 'En attente', count: demandes.filter(d => d.statut === 'EN_ATTENTE').length, Icon: Clock, couleur: 'bg-yellow-50 text-yellow-700' },
+            { label: 'Acceptées', count: demandes.filter(d => d.statut === 'ACCEPTE').length, Icon: CheckCircle, couleur: 'bg-green-50 text-green-700' },
+            { label: 'Rejetées', count: demandes.filter(d => d.statut === 'REJETE').length, Icon: XCircle, couleur: 'bg-red-50 text-red-700' },
+          ].map(({ label, count, Icon, couleur }) => (
+            <div key={label} className={`${couleur} rounded-xl p-5 flex justify-between items-center shadow-sm border border-gray-100`}>
+              <div>
+                <p className="text-xs opacity-70 mb-1">{label}</p>
+                <p className="text-3xl font-bold">{count}</p>
+              </div>
+              <Icon size={28} strokeWidth={1.5} className="opacity-40" />
             </div>
           ))}
         </div>
 
         {/* Filtres */}
-        <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex gap-3 flex-wrap">
-          {['', 'EN_ATTENTE', 'ACCEPTE', 'REJETE', 'ACTE_DISPONIBLE'].map((statut) => (
-            <button key={statut} onClick={() => setFiltreStatut(statut)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition
-                ${filtreStatut === statut ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-              {statut === '' ? 'Toutes' : statutLabels[statut]}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex gap-2 flex-wrap border border-gray-100">
+          {filtres.map(({ value, label, Icon }) => (
+            <button key={value} onClick={() => setFiltreStatut(value)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition
+                ${filtreStatut === value ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              {Icon && <Icon size={14} />} {label}
             </button>
           ))}
         </div>
 
-        {/* Liste des demandes */}
+        {/* Liste */}
         {chargement ? (
-          <div className="text-center py-12 text-gray-500">Chargement...</div>
+          <div className="text-center py-12 text-gray-400">Chargement...</div>
         ) : demandes.length === 0 ? (
-          <div className="bg-white rounded-xl p-12 text-center text-gray-500">
-            Aucune demande trouvée
+          <div className="bg-white rounded-xl p-12 text-center text-gray-400 border border-gray-100">
+            <FileText size={40} className="mx-auto mb-3 opacity-30" strokeWidth={1} />
+            <p>Aucune demande trouvée</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {demandes.map((demande) => (
-              <div key={demande.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <p className="font-semibold text-gray-800">
-                        {demande.typeActe.replace(/_/g, ' ')}
+            {demandes.map((demande) => {
+              const config = statutConfig[demande.statut] || {};
+              const Icon = config.Icon || FileText;
+              return (
+                <div key={demande.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <p className="font-bold text-gray-800 tracking-wide">
+                          {demande.typeActe.replace(/_/g, ' ')}
+                        </p>
+                        <span className={`flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full ${config.couleur}`}>
+                          <Icon size={12} /> {config.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <User size={13} className="text-gray-400" />
+                        <span className="font-medium text-green-700">
+                          {demande.utilisateur?.prenom} {demande.utilisateur?.nom}
+                        </span>
+                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-500">{demande.utilisateur?.email}</span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Soumise le {new Date(demande.createdAt).toLocaleDateString('fr-FR')}
+                        {demande.documents?.length > 0 && (
+                          <span className="ml-2 flex items-center gap-1 inline-flex">
+                            <FileText size={11} /> {demande.documents.length} document(s)
+                          </span>
+                        )}
                       </p>
-                      <span className={`text-xs font-medium px-3 py-1 rounded-full ${statutColors[demande.statut]}`}>
-                        {statutLabels[demande.statut]}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      👤 {demande.utilisateur?.prenom} {demande.utilisateur?.nom}
-                      <span className="ml-2 text-gray-400">— {demande.utilisateur?.email}</span>
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Soumise le {new Date(demande.createdAt).toLocaleDateString('fr-FR')}
-                      {demande.documents?.length > 0 && (
-                        <span className="ml-2">📎 {demande.documents.length} document(s)</span>
+                      {demande.raisonRejet && (
+                        <div className="mt-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-sm text-red-700 flex items-center gap-2">
+                          <XCircle size={14} /> Motif : {demande.raisonRejet}
+                        </div>
                       )}
-                    </p>
-                    {demande.raisonRejet && (
-                      <p className="text-sm text-red-600 mt-2 bg-red-50 px-3 py-1 rounded">
-                        Motif : {demande.raisonRejet}
-                      </p>
+                    </div>
+
+                    {demande.statut === 'EN_ATTENTE' && (
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => { setDemandeSelectionnee(demande); setModal('accepter'); }}
+                          className="flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                          <Check size={15} /> Accepter
+                        </button>
+                        <button
+                          onClick={() => { setDemandeSelectionnee(demande); setModal('rejeter'); }}
+                          className="flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition">
+                          <X size={15} /> Rejeter
+                        </button>
+                      </div>
                     )}
                   </div>
 
-                  {/* Actions */}
-                  {demande.statut === 'EN_ATTENTE' && (
-                    <div className="flex gap-2 ml-4">
-                      <button
-                        onClick={() => { setDemandeSelectionnee(demande); setModal('accepter'); }}
-                        className="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-800 transition">
-                        ✅ Accepter
+                  {/* Données formulaire */}
+                  {demande.donnees && (
+                    <div className="mt-3">
+                      <button onClick={() => toggleDemande(demande.id)}
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700">
+                        <ChevronDown size={14} className={`transition-transform ${demandesOuvertes[demande.id] ? 'rotate-180' : ''}`} />
+                        Voir les informations soumises
                       </button>
-                      <button
-                        onClick={() => { setDemandeSelectionnee(demande); setModal('rejeter'); }}
-                        className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition">
-                        ❌ Rejeter
-                      </button>
+                      {demandesOuvertes[demande.id] && (
+                        <div className="mt-2 bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-3">
+                          {Object.entries(demande.donnees).map(([k, v]) => (
+                            <div key={k}>
+                              <p className="text-xs text-gray-400">{k}</p>
+                              <p className="text-sm font-medium text-gray-800">{v}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-
-                {/* Données du formulaire */}
-                {demande.donnees && (
-                  <details className="mt-3">
-                    <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
-                      Voir les informations soumises
-                    </summary>
-                    <div className="mt-2 bg-gray-50 rounded-lg p-3 grid grid-cols-2 gap-2">
-                      {Object.entries(demande.donnees).map(([k, v]) => (
-                        <div key={k}>
-                          <p className="text-xs text-gray-500">{k}</p>
-                          <p className="text-sm font-medium text-gray-800">{v}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </details>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -215,30 +234,37 @@ export default function DashboardAdmin() {
       {modal === 'accepter' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4 z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">✅ Accepter la demande</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle size={20} className="text-green-600" />
+              <h3 className="text-lg font-bold text-gray-800">Accepter la demande</h3>
+            </div>
             <p className="text-sm text-gray-600 mb-4">
               Demande : <strong>{demandeSelectionnee?.typeActe.replace(/_/g, ' ')}</strong>
             </p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date de rendez-vous</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <Calendar size={14} className="inline mr-1" /> Date de rendez-vous
+                </label>
                 <input type="datetime-local" value={dateRdv} onChange={e => setDateRdv(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date de disponibilité de l'acte</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <CheckCircle size={14} className="inline mr-1" /> Date de disponibilité de l'acte
+                </label>
                 <input type="datetime-local" value={dateDispo} onChange={e => setDateDispo(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setModal(null)}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50">
+                className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl hover:bg-gray-50 text-sm font-medium">
                 Annuler
               </button>
               <button onClick={handleAccepter}
-                className="flex-1 bg-green-700 text-white py-2 rounded-lg font-semibold hover:bg-green-800">
-                Confirmer
+                className="flex-1 bg-green-600 text-white py-2.5 rounded-xl font-semibold hover:bg-green-700 text-sm flex items-center justify-center gap-2">
+                <Check size={16} /> Confirmer
               </button>
             </div>
           </div>
@@ -249,26 +275,27 @@ export default function DashboardAdmin() {
       {modal === 'rejeter' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4 z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">❌ Rejeter la demande</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <XCircle size={20} className="text-red-600" />
+              <h3 className="text-lg font-bold text-gray-800">Rejeter la demande</h3>
+            </div>
             <p className="text-sm text-gray-600 mb-4">
               Demande : <strong>{demandeSelectionnee?.typeActe.replace(/_/g, ' ')}</strong>
             </p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Raison du rejet *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Raison du rejet *</label>
               <textarea value={raisonRejet} onChange={e => setRaisonRejet(e.target.value)}
                 rows={4} placeholder="Expliquez clairement pourquoi la demande est rejetée..."
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
             </div>
             <div className="flex gap-3 mt-4">
               <button onClick={() => setModal(null)}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50">
+                className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl hover:bg-gray-50 text-sm font-medium">
                 Annuler
               </button>
               <button onClick={handleRejeter}
-                className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700">
-                Rejeter
+                className="flex-1 bg-red-600 text-white py-2.5 rounded-xl font-semibold hover:bg-red-700 text-sm flex items-center justify-center gap-2">
+                <X size={16} /> Rejeter
               </button>
             </div>
           </div>

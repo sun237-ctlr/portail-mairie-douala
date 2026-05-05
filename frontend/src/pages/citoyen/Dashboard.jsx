@@ -5,10 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import AssistantIA from '../../components/AssistantIA';
 import Navbar from '../../components/Navbar';
 import { FileText, PlusCircle, Clock, CheckCircle, XCircle, Search, SlidersHorizontal, Download, Calendar } from 'lucide-react';
-import {
-  FileText, PlusCircle, Clock, CheckCircle,
-  XCircle, Search, SlidersHorizontal, Download
-} from 'lucide-react';
 
 const statutConfig = {
   EN_ATTENTE: { label: 'En attente', couleur: 'bg-yellow-100 text-yellow-700', Icon: Clock },
