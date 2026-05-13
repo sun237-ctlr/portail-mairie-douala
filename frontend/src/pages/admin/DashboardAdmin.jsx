@@ -212,13 +212,42 @@ export default function DashboardAdmin() {
                         Voir les informations soumises
                       </button>
                       {demandesOuvertes[demande.id] && (
-                        <div className="mt-2 bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-3">
-                          {Object.entries(demande.donnees).map(([k, v]) => (
-                            <div key={k}>
-                              <p className="text-xs text-gray-400">{k}</p>
-                              <p className="text-sm font-medium text-gray-800">{v}</p>
+                        <div className="mt-2 space-y-3">
+                          {/* Données du formulaire */}
+                          <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-3">
+                            {Object.entries(demande.donnees).map(([k, v]) => (
+                              <div key={k}>
+                                <p className="text-xs text-gray-400">{k}</p>
+                                <p className="text-sm font-medium text-gray-800">{v}</p>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Documents */}
+                          {demande.documents && demande.documents.length > 0 && (
+                            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                              <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                                <FileText size={16} /> Documents fournis ({demande.documents.length})
+                              </h4>
+                              <div className="space-y-2">
+                                {demande.documents.map((doc) => (
+                                  <div key={doc.id} className="flex items-center justify-between bg-white rounded-lg p-3 border border-blue-200">
+                                    <div className="flex items-center gap-3">
+                                      <FileText size={16} className="text-blue-600" />
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-800">{doc.nom}</p>
+                                        <p className="text-xs text-gray-500">{doc.type} • {(new Date(doc.createdAt)).toLocaleDateString('fr-FR')}</p>
+                                      </div>
+                                    </div>
+                                    <a href={`http://localhost:5000${doc.url}`} target="_blank" rel="noopener noreferrer"
+                                      className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition flex items-center gap-1">
+                                      <FileText size={12} /> Voir
+                                    </a>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          ))}
+                          )}
                         </div>
                       )}
                     </div>
