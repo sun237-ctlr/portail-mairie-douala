@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api`,
 });
 
 API.interceptors.request.use((config) => {
@@ -16,8 +16,9 @@ export const inscription = (formData) => API.post('/auth/inscription', formData,
 export const connexion = (data) => API.post('/auth/connexion', data);
 export const connexionAdmin = (data) => API.post('/auth/admin/connexion', data);
 export const getMesDemandes = () => API.get('/demandes/mes-demandes');
+export const getDemandeById = (id) => API.get(`/demandes/${id}`);
 export const creerDemande = (data) => API.post('/demandes', data);
-export const verifierParCode = (code) => API.get(`/demandes/verifier/${code}`);
+export const verifierParCode = (code, typeActe) => API.get(`/demandes/verifier/${code}`, { params: typeActe ? { typeActe } : {} });
 export const uploadDocuments = (demandeId, formData) =>
   API.post(`/documents/${demandeId}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }

@@ -1,5 +1,11 @@
 node_modules/
+backend/node_modules/
+frontend/node_modules/
 .env
 *.log
+backend/uploads/
+backend/test_cni_recto.png
+backend/test_cni_verso.png
+mysql-data/
 dist/
 build/

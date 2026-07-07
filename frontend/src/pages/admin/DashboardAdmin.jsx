@@ -4,7 +4,7 @@ import { getDemandesAdmin, accepterDemande, rejeterDemande } from '../../service
 import { useAuth } from '../../context/AuthContext';
 import {
   FileText, LogOut, CheckCircle, XCircle, Clock,
-  User, ChevronDown, Building2, Check, X, Calendar
+  User, ChevronDown, Building2, Check, X, Calendar, Mail
 } from 'lucide-react';
 
 const statutConfig = {
@@ -14,6 +14,14 @@ const statutConfig = {
   REJETE: { label: 'Rejeté', couleur: 'bg-red-100 text-red-800', Icon: XCircle },
   RENDEZ_VOUS_PROGRAMME: { label: 'RDV programmé', couleur: 'bg-purple-100 text-purple-800', Icon: Calendar },
   ACTE_DISPONIBLE: { label: 'Disponible', couleur: 'bg-teal-100 text-teal-800', Icon: CheckCircle },
+};
+
+const etapeConfirmationConfig = {
+  EN_ATTENTE: { label: 'En attente d\'acceptation', couleur: 'bg-gray-50 text-gray-700', Icon: Clock },
+  EMAIL_ENVOYE: { label: 'Email de confirmation envoyé', couleur: 'bg-blue-50 text-blue-700', Icon: Mail },
+  CONFIRME: { label: 'Informations confirmées', couleur: 'bg-purple-50 text-purple-700', Icon: CheckCircle },
+  MODIFICATIONS_DEMANDEES: { label: 'Modifications demandées', couleur: 'bg-orange-50 text-orange-700', Icon: Clock },
+  RENDEZ_VOUS_FIXE: { label: 'Rendez-vous fixé', couleur: 'bg-green-50 text-green-700', Icon: CheckCircle },
 };
 
 export default function DashboardAdmin() {
@@ -26,14 +34,10 @@ export default function DashboardAdmin() {
   const [modal, setModal] = useState(null);
   const [raisonRejet, setRaisonRejet] = useState('');
   const [dateRdv, setDateRdv] = useState('');
-  const [dateDispo, setDateDispo] = useState('');
   const [message, setMessage] = useState('');
   const [demandesOuvertes, setDemandesOuvertes] = useState({});
 
-  useEffect(() => {
-    if (!admin) { navigate('/admin/connexion'); return; }
-    chargerDemandes();
-  }, [admin, filtreStatut]);
+  const getDateRendezVous = (demande) => demande.dateRendezVous || demande.rendezVous?.dateRendezVous;
 
   const chargerDemandes = async () => {
     setChargement(true);
@@ -48,15 +52,22 @@ export default function DashboardAdmin() {
     }
   };
 
+  useEffect(() => {
+    if (!admin) { navigate('/admin/connexion'); return; }
+     
+    (async () => { await chargerDemandes(); })();
+  }, [admin, filtreStatut, navigate]);
+
   const handleAccepter = async () => {
     try {
-      await accepterDemande(demandeSelectionnee.id, { dateRendezVous: dateRdv, dateDisponibilite: dateDispo });
-      setMessage('Demande acceptée avec succès');
+      await accepterDemande(demandeSelectionnee.id, {});
+      setMessage('Email de confirmation envoyé au citoyen');
       setModal(null);
       setDemandeSelectionnee(null);
-      chargerDemandes();
-    } catch {
-      setMessage('Erreur lors de l\'acceptation');
+      await chargerDemandes();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      setMessage('Erreur lors de l\'acceptation: ' + (err.response?.data?.message || err.message));
     }
   };
 
@@ -69,8 +80,32 @@ export default function DashboardAdmin() {
       setDemandeSelectionnee(null);
       setRaisonRejet('');
       chargerDemandes();
-    } catch {
-      setMessage('Erreur lors du rejet');
+    } catch (err) {
+      setMessage('Erreur lors du rejet: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleFixerRendezVous = async () => {
+    if (!dateRdv) { setMessage('Veuillez sélectionner une date'); return; }
+    try {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const response = await fetch(`${apiBase}/api/admin/demandes/${demandeSelectionnee.id}/confirmer`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ dateRendezVous: dateRdv })
+      });
+      if (!response.ok) throw new Error('Erreur');
+      setMessage('Rendez-vous fixé et email envoyé');
+      setModal(null);
+      setDemandeSelectionnee(null);
+      setDateRdv('');
+      await chargerDemandes();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      setMessage('Erreur: ' + err.message);
     }
   };
 
@@ -128,6 +163,57 @@ export default function DashboardAdmin() {
           ))}
         </div>
 
+        {/* Rendez-vous à venir */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+          <div className="flex items-center gap-3 mb-4">
+            <Calendar size={20} className="text-purple-600" />
+            <h2 className="text-lg font-bold text-gray-800">Rendez-vous programmés</h2>
+          </div>
+          {demandes.filter(d => getDateRendezVous(d)).length === 0 ? (
+            <p className="text-gray-500 text-center py-4">Aucun rendez-vous programmé</p>
+          ) : (
+            <div className="space-y-3">
+              {demandes
+                .filter(d => getDateRendezVous(d))
+                .sort((a, b) => new Date(getDateRendezVous(a)) - new Date(getDateRendezVous(b)))
+                .map((demande) => (
+                  <div key={demande.id} className="flex items-center justify-between bg-purple-50 rounded-lg p-4 border border-purple-100">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <Calendar size={18} className="text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          {demande.utilisateur?.prenom} {demande.utilisateur?.nom}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {demande.typeActe.replace(/_/g, ' ')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-purple-700">
+                        {new Date(getDateRendezVous(demande)).toLocaleDateString('fr-FR', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                      {demande.dateDisponibilite && (
+                        <p className="text-xs text-gray-500">
+                          Disponibilité: {new Date(demande.dateDisponibilite).toLocaleDateString('fr-FR')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+
         {/* Filtres */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex gap-2 flex-wrap border border-gray-100">
           {filtres.map(({ value, label, Icon }) => (
@@ -153,7 +239,7 @@ export default function DashboardAdmin() {
               const config = statutConfig[demande.statut] || {};
               const Icon = config.Icon || FileText;
               return (
-                <div key={demande.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <div key={demande.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 card">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -164,6 +250,21 @@ export default function DashboardAdmin() {
                           <Icon size={12} /> {config.label}
                         </span>
                       </div>
+                      
+                      {/* Afficher l'étape de confirmation */}
+                      {demande.etapeConfirmation && (
+                        <div className="flex items-center gap-2 mb-2">
+                          {(() => {
+                            const etapeConfig = etapeConfirmationConfig[demande.etapeConfirmation];
+                            return (
+                              <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full border ${etapeConfig.couleur}`}>
+                                <etapeConfig.Icon size={12} /> {etapeConfig.label}
+                              </span>
+                            );
+                          })()}
+                        </div>
+                      )}
+
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <User size={13} className="text-gray-400" />
                         <span className="font-medium text-green-700">
@@ -191,13 +292,23 @@ export default function DashboardAdmin() {
                       <div className="flex gap-2 ml-4">
                         <button
                           onClick={() => { setDemandeSelectionnee(demande); setModal('accepter'); }}
-                          className="flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                          className="flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition btn-smooth">
                           <Check size={15} /> Accepter
                         </button>
                         <button
                           onClick={() => { setDemandeSelectionnee(demande); setModal('rejeter'); }}
-                          className="flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition">
+                          className="flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition btn-smooth">
                           <X size={15} /> Rejeter
+                        </button>
+                      </div>
+                    )}
+
+                    {demande.statut === 'ACCEPTE' && demande.etapeConfirmation === 'CONFIRME' && (
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => { setDemandeSelectionnee(demande); setModal('rdv'); setDateRdv(''); }}
+                          className="flex items-center gap-1.5 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition btn-smooth">
+                          <Calendar size={15} /> Fixer RDV
                         </button>
                       </div>
                     )}
@@ -239,7 +350,7 @@ export default function DashboardAdmin() {
                                         <p className="text-xs text-gray-500">{doc.type} • {(new Date(doc.createdAt)).toLocaleDateString('fr-FR')}</p>
                                       </div>
                                     </div>
-                                    <a href={`http://localhost:5000${doc.url}`} target="_blank" rel="noopener noreferrer"
+                                    <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${doc.url}`} target="_blank" rel="noopener noreferrer"
                                       className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition flex items-center gap-1">
                                       <FileText size={12} /> Voir
                                     </a>
@@ -268,32 +379,54 @@ export default function DashboardAdmin() {
               <h3 className="text-lg font-bold text-gray-800">Accepter la demande</h3>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              Demande : <strong>{demandeSelectionnee?.typeActe.replace(/_/g, ' ')}</strong>
+              Un email de confirmation sera envoyé à <strong>{demandeSelectionnee?.utilisateur?.email}</strong> pour que le citoyen valide ses informations.
             </p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <Calendar size={14} className="inline mr-1" /> Date de rendez-vous
-                </label>
-                <input type="datetime-local" value={dateRdv} onChange={e => setDateRdv(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <CheckCircle size={14} className="inline mr-1" /> Date de disponibilité de l'acte
-                </label>
-                <input type="datetime-local" value={dateDispo} onChange={e => setDateDispo(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
-              </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4 text-sm text-blue-700">
+              📬 Après acceptation, le citoyen devra confirmer ses informations par email avant que vous puissiez fixer un rendez-vous.
             </div>
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3">
               <button onClick={() => setModal(null)}
                 className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl hover:bg-gray-50 text-sm font-medium">
                 Annuler
               </button>
               <button onClick={handleAccepter}
                 className="flex-1 bg-green-600 text-white py-2.5 rounded-xl font-semibold hover:bg-green-700 text-sm flex items-center justify-center gap-2">
-                <Check size={16} /> Confirmer
+                <Check size={16} /> Accepter & Envoyer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Fixer Rendez-vous */}
+      {modal === 'rdv' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar size={20} className="text-purple-600" />
+              <h3 className="text-lg font-bold text-gray-800">Fixer un rendez-vous</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Citoyen : <strong>{demandeSelectionnee?.utilisateur?.prenom} {demandeSelectionnee?.utilisateur?.nom}</strong>
+            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date et heure du rendez-vous *
+              </label>
+              <input type="datetime-local" value={dateRdv} onChange={e => setDateRdv(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            </div>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg px-4 py-3 mt-4 text-sm text-purple-700">
+              ✉️ Un email avec le code de récupération et la date sera envoyé au citoyen.
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setModal(null)}
+                className="flex-1 border border-gray-200 text-gray-700 py-2.5 rounded-xl hover:bg-gray-50 text-sm font-medium">
+                Annuler
+              </button>
+              <button onClick={handleFixerRendezVous}
+                className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl font-semibold hover:bg-purple-700 text-sm flex items-center justify-center gap-2">
+                <Calendar size={16} /> Fixer
               </button>
             </div>
           </div>

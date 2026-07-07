@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import AssistantIA from '../components/AssistantIA';
 /*import {
   FileText, Baby, Heart, Cross, Home, Flag,
@@ -14,7 +15,7 @@ import {
   CheckSquare, Scale, MapPin, Users, Clock,
   Shield, Smartphone, LayoutDashboard, PlusCircle,
   FolderOpen, Download, HelpCircle, FileCheck,
-  Activity, Share2, Mail
+  Activity, Share2
 } from 'lucide-react';
 
 const services = [
@@ -44,8 +45,41 @@ const etapes = [
 ];
 
 export default function Accueil() {
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const hideTimer = setTimeout(() => setIsVisible(false), 5000);
+    const removeTimer = setTimeout(() => setShowWelcome(false), 5600);
+    return () => {
+      clearTimeout(hideTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
+      {showWelcome && (
+        <div className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 backdrop-blur-sm px-4 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`rounded-[28px] bg-white shadow-[0_40px_120px_rgba(15,23,42,0.15)] border border-slate-200/80 p-8 max-w-2xl w-full text-center transform transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-5'}`}>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-600 text-white text-3xl mb-5 shadow-lg shadow-emerald-600/20">
+              <span>🎉</span>
+            </div>
+            <h2 className="text-3xl font-semibold text-slate-900 mb-3">Bienvenue sur e-Mairie Douala</h2>
+            <p className="text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
+              Votre portail officiel pour faire vos démarches administratives plus vite, plus simplement et depuis chez vous.
+            </p>
+            <div className="mt-6 flex justify-center gap-3">
+              <Link to="/inscription" className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition">
+                Démarrer maintenant
+              </Link>
+              <button type="button" onClick={() => setIsVisible(false)} className="inline-flex items-center justify-center rounded-full border border-slate-200 px-6 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* NAVBAR */}
       <nav className="bg-white border-b border-gray-100 px-6 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-3">

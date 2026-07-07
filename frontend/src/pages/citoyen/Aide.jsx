@@ -31,61 +31,75 @@ export default function Aide() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Navbar />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <HelpCircle size={28} className="text-green-600" />
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <HelpCircle size={28} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Centre d'Aide</h1>
-          <p className="text-gray-500">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Centre d'Aide</h1>
+          <p className="text-gray-600">
             Trouvez des réponses à vos questions sur les services de la plateforme e-Mairie Douala
           </p>
         </div>
 
         {/* Onglets */}
-        <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+        <div className="flex bg-white rounded-xl p-1.5 mb-6 shadow-md border border-gray-100">
           {Object.keys(faqs).map((tab) => (
             <button key={tab} onClick={() => setOnglet(tab)}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition
-                ${onglet === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+              className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all duration-300
+                ${onglet === tab 
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                  : 'text-gray-600 hover:text-green-600'}`}>
               {tab}
             </button>
           ))}
         </div>
 
         {/* Recherche */}
-        <div className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center gap-2 mb-6 shadow-sm">
-          <Search size={16} className="text-gray-400" />
+        <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-2 mb-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+          <Search size={18} className="text-green-500" />
           <input value={recherche} onChange={e => setRecherche(e.target.value)}
             placeholder="Rechercher dans les questions fréquentes..."
             className="flex-1 text-sm focus:outline-none text-gray-700 placeholder-gray-400" />
         </div>
 
         {/* Questions */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4">
-          <div className="flex items-center gap-2 px-6 py-4 border-b border-gray-50">
-            <FileText size={16} className="text-green-600" />
-            <p className="font-semibold text-gray-800">{onglet}</p>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden mb-4">
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-transparent">
+            <FileText size={18} className="text-green-600" />
+            <p className="font-bold text-gray-800 text-lg">{onglet}</p>
           </div>
-          {questions.map((faq, i) => (
-            <div key={i} className="border-b border-gray-50 last:border-0">
-              <button onClick={() => setOuvert(ouvert === i ? null : i)}
-                className="w-full flex justify-between items-center px-6 py-4 text-left hover:bg-gray-50 transition">
-                <span className="text-sm font-medium text-gray-800">{faq.q}</span>
-                <ChevronDown size={16} className={`text-gray-400 transition-transform ${ouvert === i ? 'rotate-180' : ''}`} />
-              </button>
-              {ouvert === i && (
-                <div className="px-6 pb-4 text-sm text-gray-600 leading-relaxed">
-                  {faq.r}
-                </div>
-              )}
-            </div>
-          ))}
+          <div className="divide-y divide-gray-100">
+            {questions.map((faq, i) => (
+              <div key={i} className="group hover:bg-gradient-to-r hover:from-green-50 hover:to-transparent transition-colors duration-200">
+                <button onClick={() => setOuvert(ouvert === i ? null : i)}
+                  className="w-full flex justify-between items-center px-6 py-4 text-left">
+                  <span className="text-sm font-semibold text-gray-800 group-hover:text-green-700 transition-colors">{faq.q}</span>
+                  <ChevronDown size={18} className={`text-green-600 transition-transform duration-300 ${ouvert === i ? 'rotate-180' : ''}`} />
+                </button>
+                {ouvert === i && (
+                  <div className="px-6 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-100 animate-fade-in">
+                    {faq.r}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

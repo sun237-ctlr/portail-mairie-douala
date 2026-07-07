@@ -1,0 +1,56 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: portail-mairie-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: portail_mairie
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    ports:
+      - '3307:3306'
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h localhost -uroot -proot']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portail-mairie-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: mysql://appuser:apppass@db:3306/portail_mairie
+      JWT_SECRET: mairie_douala_secret_key_2024
+      FRONTEND_URL: http://frontend:5173
+      PORT: 5001
+    ports:
+      - '5001:5001'
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:5001
+    container_name: portail-mairie-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:5001
+    ports:
+      - '5173:5173'
+    depends_on:
+      backend:
+        condition: service_started

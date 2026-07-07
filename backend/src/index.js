@@ -3,6 +3,16 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+// Global error handlers to log uncaught exceptions and unhandled rejections
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION', err);
+  try { require('fs').appendFileSync('server_error.log', `${new Date().toISOString()} UNCAUGHT EXCEPTION: ${err.stack || err}\n`); } catch (e) {}
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION', reason);
+  try { require('fs').appendFileSync('server_error.log', `${new Date().toISOString()} UNHANDLED REJECTION: ${reason}\n`); } catch (e) {}
+});
+
 const authRoutes = require('./routes/auth');
 const demandesRoutes = require('./routes/demandes');
 const adminRoutes = require('./routes/admin');

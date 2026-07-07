@@ -31,7 +31,8 @@ export default function RecupererActe() {
     setResultat(null);
     setChargement(true);
     try {
-      const res = await verifierParCode(recherche);
+      const expectedType = searchParams.get('type') || null;
+      const res = await verifierParCode(recherche, expectedType);
       setResultat(res.data.demande);
     } catch {
       setErreur('Aucune demande trouvée avec ce code. Vérifiez votre code de suivi.');
@@ -93,6 +94,21 @@ export default function RecupererActe() {
         {resultat && (() => {
           const config = statutConfig[resultat.statut] || {};
           const Icon = config.Icon || FileText;
+
+          // Message d'information selon le statut et disponibilité
+          let infoMessage = null;
+          if (resultat.statut === 'REJETE' && resultat.raisonRejet) {
+            infoMessage = `Demande rejetée : ${resultat.raisonRejet}`;
+          } else if (resultat.statut === 'EN_ATTENTE') {
+            infoMessage = 'Votre demande est en attente de traitement. Vous serez notifié par email des prochaines étapes.';
+          } else if (resultat.statut === 'VERIFICATION_EN_COURS') {
+            infoMessage = 'Votre demande est actuellement en cours de vérification.';
+          } else if (resultat.statut === 'ACCEPTE' && !resultat.acteDisponible) {
+            infoMessage = 'Votre demande a été acceptée. Un rendez-vous vous sera bientôt proposé.';
+          } else if (resultat.acteDisponible && resultat.dateDisponibilite) {
+            infoMessage = `✅ Votre acte sera disponible le ${new Date(resultat.dateDisponibilite).toLocaleDateString('fr-FR')}`;
+          }
+
           return (
             <div className={`border-2 rounded-2xl p-6 mb-6 ${config.couleur}`}>
               <div className="flex items-center gap-3 mb-4">
@@ -112,34 +128,49 @@ export default function RecupererActe() {
                   <span className="opacity-70">Code de suivi</span>
                   <span className="font-mono font-bold tracking-widest">{resultat.codeUnique}</span>
                 </div>
+                {resultat.codeRecuperation && (
+                  <div className="flex justify-between">
+                    <span className="opacity-70">Code de récupération</span>
+                    <span className="font-mono font-bold tracking-widest">{resultat.codeRecuperation}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="opacity-70">Date de soumission</span>
                   <span className="font-medium">{new Date(resultat.createdAt).toLocaleDateString('fr-FR')}</span>
                 </div>
-                {resultat.dateRendezVous && (
+                {resultat.rendezVous && (
                   <div className="flex justify-between">
                     <span className="opacity-70">📅 Rendez-vous</span>
-                    <span className="font-semibold">{new Date(resultat.dateRendezVous).toLocaleDateString('fr-FR')}</span>
+                    <span className="font-semibold">{new Date(resultat.rendezVous.dateRendezVous).toLocaleDateString('fr-FR')}</span>
                   </div>
                 )}
-                {resultat.dateDisponibilite && (
+                {resultat.acteDisponible && resultat.dateDisponibilite && (
                   <div className="flex justify-between">
-                    <span className="opacity-70">🎉 Disponible à partir du</span>
+                    <span className="opacity-70">🎉 Acte disponible le</span>
                     <span className="font-bold text-green-700">{new Date(resultat.dateDisponibilite).toLocaleDateString('fr-FR')}</span>
-                  </div>
-                )}
-                {resultat.raisonRejet && (
-                  <div className="mt-2 bg-red-50 rounded-xl p-3">
-                    <p className="font-medium text-red-700 mb-1">Motif de rejet :</p>
-                    <p className="text-red-600">{resultat.raisonRejet}</p>
                   </div>
                 )}
               </div>
 
+              {infoMessage && (
+                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <p className="text-sm text-blue-800 font-medium">{infoMessage}</p>
+                </div>
+              )}
+
               {resultat.statut === 'ACTE_DISPONIBLE' && (
                 <div className="mt-4 bg-green-700 text-white rounded-xl p-4 text-center">
                   <p className="font-bold mb-1">✅ Votre acte est prêt !</p>
-                  <p className="text-sm text-green-100">Présentez-vous à votre mairie avec votre CNI originale.</p>
+                  <p className="text-sm text-green-100">Présentez-vous à votre mairie avec votre CNI originale et votre code de récupération.</p>
+                </div>
+              )}
+
+              {resultat.acteDisponible && resultat.dateDisponibilite && (
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <p className="text-sm text-amber-800 font-medium">
+                    ⏰ Acte disponible à partir du {new Date(resultat.dateDisponibilite).toLocaleDateString('fr-FR')}
+                  </p>
+                  <p className="text-xs text-amber-700 mt-1">Présentez-vous avec votre CNI originale et votre code de récupération.</p>
                 </div>
               )}
             </div>

@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginAdmin = (token, adminData) => {
     localStorage.setItem('token', token);
+    localStorage.setItem('adminToken', token);
     localStorage.setItem('admin', JSON.stringify(adminData));
     setAdmin(adminData);
   };

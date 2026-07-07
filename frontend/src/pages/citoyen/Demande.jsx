@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { creerDemande, uploadDocuments } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import FormReminder from '../../components/FormReminder';
 
 const ACTES_CONFIG = {
   ACTE_NAISSANCE: {
@@ -167,12 +168,12 @@ export default function Demande() {
 
   if (succes) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-md p-10 text-center max-w-md">
+      <div className="bg-white rounded-2xl shadow-md p-10 text-center max-w-md scale-in">
         <div className="text-5xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Demande soumise !</h2>
         <p className="text-gray-500 mb-6">Votre demande a été transmise à la mairie.</p>
         <button onClick={() => navigate('/dashboard')}
-          className="bg-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-800 transition">
+          className="bg-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-800 transition btn-smooth">
           Voir mes demandes
         </button>
       </div>
@@ -181,36 +182,42 @@ export default function Demande() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-green-700 text-white px-6 py-4 flex justify-between items-center">
+      <nav className="bg-green-700 text-white px-6 py-4 flex justify-between items-center card">
         <div className="flex items-center gap-2">
           <span className="text-xl">🏛️</span>
           <span className="font-bold">Mairie de Douala</span>
         </div>
         <button onClick={() => navigate('/dashboard')}
-          className="text-sm border border-white px-3 py-1 rounded-lg hover:bg-green-600">
+          className="text-sm border border-white px-3 py-1 rounded-lg hover:bg-green-600 btn-smooth">
           Retour
         </button>
       </nav>
 
       <div className="max-w-2xl mx-auto py-8 px-4">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          {['Choisir', 'Formulaire', 'Documents'].map((label, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                ${etape >= i + 1 ? 'bg-green-700 text-white' : 'bg-gray-200 text-gray-500'}`}>
-                {etape > i + 1 ? '✓' : i + 1}
-              </div>
-              <span className={`text-xs ${etape === i + 1 ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>
-                {label}
-              </span>
-              {i < 2 && <div className="w-6 h-0.5 bg-gray-200" />}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-full max-w-xl">
+            <div className="flex items-center justify-between mb-3">
+              {['Choisir', 'Formulaire', 'Documents'].map((label, i) => (
+                <div key={i} className="flex flex-col items-center text-center">
+                  <div className={`step-dot ${etape >= i + 1 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                    {etape > i + 1 ? '✓' : i + 1}
+                  </div>
+                  <span className={`text-xs mt-2 ${etape === i + 1 ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>
+                    {label}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
+            <div className="progress-track">
+              <div className="progress-fill" style={{ width: `${((etape - 1) / 2) * 100}%` }} />
+            </div>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6">
           {etape === 1 && (
             <>
+              <FormReminder message="Vérifiez vos informations avant de procéder." />
               <h2 className="text-xl font-bold text-gray-800 mb-4">Choisissez votre acte</h2>
               <div className="grid grid-cols-2 gap-3">
                 {Object.entries(ACTES_CONFIG).map(([key, val]) => (
@@ -231,6 +238,7 @@ export default function Demande() {
 
           {etape === 2 && config && (
             <>
+              <FormReminder message="Remplissez tous les champs requis avec des informations exactes." />
               <h2 className="text-xl font-bold text-gray-800 mb-4">{config.icon} {config.label}</h2>
               <div className="space-y-4">
                 {config.champs.map((champ) => (
@@ -271,7 +279,7 @@ export default function Demande() {
 
               <div className="space-y-4 mb-6">
                 {config.documents.map((doc, i) => (
-                  <div key={i} className="border border-gray-200 rounded-xl p-4">
+                  <div key={i} className="border border-gray-200 rounded-xl p-4 card">
                     <div className="flex items-center gap-2 mb-3">
                       <span>📎</span>
                       <span className="text-sm font-medium text-gray-700">{doc}</span>
@@ -279,10 +287,13 @@ export default function Demande() {
                     </div>
                     <div className="flex gap-2">
                       {/* Prendre une photo avec la caméra */}
-                      <label className="flex-1 cursor-pointer">
-                        <div className="flex items-center justify-center gap-2 border-2 border-dashed border-blue-300 bg-blue-50 rounded-lg py-2 px-3 hover:bg-blue-100 transition">
+                      <label className="flex-1 cursor-pointer file-drop">
+                        <div className="flex items-center justify-center gap-2 bg-transparent rounded-lg py-2 px-3">
                           <span>📷</span>
-                          <span className="text-xs text-blue-700 font-medium">Prendre photo</span>
+                          <div>
+                            <div className="text-xs text-blue-700 font-medium">Prendre photo</div>
+                            <div className="text-[11px] text-gray-400">Utilisez la caméra ou choisissez un fichier</div>
+                          </div>
                         </div>
                         <input type="file" accept="image/*" capture="environment"
                           className="hidden"
@@ -290,10 +301,13 @@ export default function Demande() {
                       </label>
 
                       {/* Scanner / choisir un fichier */}
-                      <label className="flex-1 cursor-pointer">
-                        <div className="flex items-center justify-center gap-2 border-2 border-dashed border-green-300 bg-green-50 rounded-lg py-2 px-3 hover:bg-green-100 transition">
+                      <label className="flex-1 cursor-pointer file-drop">
+                        <div className="flex items-center justify-center gap-2 bg-transparent rounded-lg py-2 px-3">
                           <span>🗂️</span>
-                          <span className="text-xs text-green-700 font-medium">Scanner / PDF</span>
+                          <div>
+                            <div className="text-xs text-green-700 font-medium">Scanner / PDF</div>
+                            <div className="text-[11px] text-gray-400">Formats: JPG, PNG, PDF</div>
+                          </div>
                         </div>
                         <input type="file" accept="image/*,application/pdf"
                           className="hidden"
@@ -304,9 +318,12 @@ export default function Demande() {
                     {/* Aperçu du fichier */}
                     {fichiers[i] && (
                       <div className="mt-2 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                        <span className="text-xs text-gray-600 truncate">{fichiers[i].name}</span>
+                        <div>
+                          <div className="text-xs text-gray-600 truncate">{fichiers[i].name}</div>
+                          <div className="text-[11px] text-gray-400">{(fichiers[i].size/1024).toFixed(0)} KB</div>
+                        </div>
                         <button onClick={() => supprimerFichier(i)}
-                          className="text-red-500 text-xs ml-2 hover:text-red-700">✕</button>
+                          className="text-red-500 text-xs ml-2 hover:text-red-700 btn-smooth">✕</button>
                       </div>
                     )}
                   </div>

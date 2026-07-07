@@ -16,6 +16,8 @@ model Utilisateur {
   telephone     String?
   dateNaissance DateTime?
   cni           String?   @unique
+  cniRecto      String?
+  cniVerso      String?
   demandes      Demande[]
   createdAt     DateTime  @default(now())
 }
@@ -31,20 +33,33 @@ model AdminMairie {
 }
 
 model Demande {
-  id                String    @id @default(uuid())
-  utilisateurId     String
-  utilisateur       Utilisateur @relation(fields: [utilisateurId], references: [id])
-  typeActe          String
-  statut            String    @default("EN_ATTENTE")
-  donnees           Json
-  codeUnique        String    @unique
-  raisonRejet       String?
-  dateRendezVous    DateTime?
-  dateDisponibilite DateTime?
-  verificationIA    Json?
-  documents         Document[]
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                    String    @id @default(uuid())
+  utilisateurId         String
+  utilisateur           Utilisateur @relation(fields: [utilisateurId], references: [id])
+  typeActe              String
+  statut                String    @default("EN_ATTENTE") // EN_ATTENTE, ACCEPTE, REJETE
+  etapeConfirmation     String    @default("EN_ATTENTE") // EN_ATTENTE, EMAIL_ENVOYE, CONFIRME, MODIFICATIONS_DEMANDEES, RENDEZ_VOUS_FIXE
+  donnees               Json
+  codeUnique            String    @unique
+  raisonRejet           String?
+  verificationIA        Json?
+  documents             Document[]
+  rendezVous            RendezVous?
+  codeRecuperation      String?   @unique
+  dateConfirmation      DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model RendezVous {
+  id              String    @id @default(uuid())
+  demandeId       String    @unique
+  demande         Demande   @relation(fields: [demandeId], references: [id])
+  dateRendezVous  DateTime
+  codeRecuperation String  @unique
+  statut          String    @default("FIXE") // FIXE, EFFECTUE, ANNULE
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Document {

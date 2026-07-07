@@ -37,6 +37,8 @@ export default function Inscription() {
   const [cniVerso, setCniVerso] = useState(null);
   const [previewRecto, setPreviewRecto] = useState(null);
   const [previewVerso, setPreviewVerso] = useState(null);
+  const [selfie, setSelfie] = useState(null);
+  const [previewSelfie, setPreviewSelfie] = useState(null);
   const [erreur, setErreur] = useState('');
   const [chargement, setChargement] = useState(false);
   const [voirMdp, setVoirMdp] = useState(false);
@@ -49,6 +51,14 @@ export default function Inscription() {
     const url = URL.createObjectURL(file);
     if (side === 'recto') { setCniRecto(file); setPreviewRecto(url); }
     else { setCniVerso(file); setPreviewVerso(url); }
+  };
+
+  const handleSelfie = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setSelfie(file);
+    setPreviewSelfie(url);
   };
 
   const handleSubmit = async (e) => {
@@ -66,6 +76,7 @@ export default function Inscription() {
       Object.entries(form).forEach(([k, v]) => formData.append(k, v));
       formData.append('cniRecto', cniRecto);
       formData.append('cniVerso', cniVerso);
+      if (selfie) formData.append('selfie', selfie);
 
       const res = await inscription(formData);
       loginCitoyen(res.data.token, res.data.utilisateur);
@@ -91,6 +102,25 @@ export default function Inscription() {
             <p className="text-green-200 text-xs">Ville de Douala</p>
           </div>
         </div>
+
+          {/* Selfie */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Selfie de vérification *</label>
+            <label className="cursor-pointer block">
+              {previewSelfie ? (
+                <div className="relative border-2 border-green-400 rounded-xl overflow-hidden h-32">
+                  <img src={previewSelfie} alt="selfie" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-200 rounded-xl h-32 flex flex-col items-center justify-center gap-2 hover:border-green-400 hover:bg-green-50 transition">
+                  <Camera size={24} className="text-gray-400" />
+                  <p className="text-xs text-gray-500 text-center">Prenez une photo de votre visage (JPG, PNG)</p>
+                </div>
+              )}
+              <input type="file" name="selfie" accept="image/*" className="hidden" onChange={handleSelfie} />
+            </label>
+            <p className="text-xs text-gray-500 mt-2">Le selfie sera comparé à la photo présente sur votre CNI.</p>
+          </div>
         <div>
           <h2 className="text-3xl font-bold mb-4 leading-tight">Inscription sécurisée</h2>
           <p className="text-green-100 mb-6">Votre CNI est requise pour garantir l'authenticité de vos demandes administratives.</p>

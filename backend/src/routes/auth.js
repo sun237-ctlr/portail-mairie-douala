@@ -27,11 +27,18 @@ const upload = multer({
 });
 
 // Inscription citoyen avec CNI
+const { verifyCNI } = require('../utils/verificationService');
+
 router.post('/inscription', upload.fields([
   { name: 'cniRecto', maxCount: 1 },
-  { name: 'cniVerso', maxCount: 1 }
+  { name: 'cniVerso', maxCount: 1 },
+  { name: 'selfie', maxCount: 1 }
 ]), async (req, res) => {
   try {
+    if (!req.body) {
+      return res.status(400).json({ message: 'Le formulaire n\'a pas été envoyé correctement.' });
+    }
+
     const { nom, prenom, email, motDePasse, telephone } = req.body;
 
     if (!nom || !prenom || !email || !motDePasse) {
@@ -59,6 +66,19 @@ router.post('/inscription', upload.fields([
       }
     });
 
+    // Run cloud verification if credentials available
+    let verification = null;
+    try {
+      if (process.env.GOOGLE_APPLICATION_CREDENTIALS && (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)) {
+        const cniRectoPath = path.join(process.cwd(), 'uploads', req.files.cniRecto[0].filename);
+        const cniVersoPath = path.join(process.cwd(), 'uploads', req.files.cniVerso[0].filename);
+        const selfiePath = req.files.selfie ? path.join(process.cwd(), 'uploads', req.files.selfie[0].filename) : null;
+        verification = await verifyCNI({ cniRectoPath, cniVersoPath, selfiePath, form: { nom, prenom } });
+      }
+    } catch (vErr) {
+      console.error('Verification error:', vErr);
+    }
+
     const token = jwt.sign(
       { id: utilisateur.id, email: utilisateur.email },
       process.env.JWT_SECRET,
@@ -68,7 +88,8 @@ router.post('/inscription', upload.fields([
     res.status(201).json({
       message: 'Compte créé avec succès',
       token,
-      utilisateur: { id: utilisateur.id, nom, prenom, email }
+      utilisateur: { id: utilisateur.id, nom, prenom, email },
+      verification
     });
 
   } catch (error) {
