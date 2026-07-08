@@ -25,5 +25,6 @@ export const uploadDocuments = (demandeId, formData) =>
 export const getDemandesAdmin = (params) => API.get('/admin/demandes', { params });
 export const accepterDemande = (id, data) => API.patch(`/admin/demandes/${id}/accepter`, data);
 export const rejeterDemande = (id, data) => API.patch(`/admin/demandes/${id}/rejeter`, data);
-
+export const motDePasseOublie = (data) => API.post('/auth/mot-de-passe-oublie', data);
+export const reinitialiserMotDePasse = (data) => API.post('/auth/reinitialiser-mot-de-passe', data);
 export default API;

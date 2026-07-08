@@ -1,20 +1,12 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import AssistantIA from '../components/AssistantIA';
-/*import {
-  FileText, Baby, Heart, Cross, Home, Flag,
-  CheckSquare, Scale, MapPin, Users, Clock,
-  Shield, Smartphone, LayoutDashboard, PlusCircle,
-  FolderOpen, Download, HelpCircle, Facebook,
-  Twitter, Instagram, FileCheck, Activity
-} from 'lucide-react';
-*/
-
 import {
   FileText, Baby, Heart, Cross, Home, Flag,
   CheckSquare, Scale, MapPin, Users, Clock,
   Shield, Smartphone, LayoutDashboard, PlusCircle,
   FolderOpen, Download, HelpCircle, FileCheck,
-  Activity, Share2, Mail
+  Activity, Share2, Mail, LogOut
 } from 'lucide-react';
 
 const services = [
@@ -44,11 +36,12 @@ const etapes = [
 ];
 
 export default function Accueil() {
+  const { utilisateur, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-white">
-      {/* NAVBAR */}
       <nav className="bg-white border-b border-gray-100 px-6 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm">
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3">
           <div className="w-9 h-9 bg-green-600 rounded-lg flex items-center justify-center">
             <FileText size={18} color="white" />
           </div>
@@ -56,15 +49,15 @@ export default function Accueil() {
             <p className="font-bold text-gray-900 leading-tight">e-Mairie Douala</p>
             <p className="text-xs text-gray-500">Ville de Douala</p>
           </div>
-        </div>
+        </Link>
         <div className="hidden md:flex items-center gap-5 text-sm text-gray-600">
           <Link to="/" className="flex items-center gap-1.5 text-green-700 font-medium">
             <LayoutDashboard size={15} /> Accueil
           </Link>
-          <Link to="/inscription" className="flex items-center gap-1.5 hover:text-green-700">
+          <Link to={utilisateur ? '/demande' : '/inscription'} className="flex items-center gap-1.5 hover:text-green-700">
             <PlusCircle size={15} /> Nouvelle Demande
           </Link>
-          <Link to="/dashboard" className="flex items-center gap-1.5 hover:text-green-700">
+          <Link to={utilisateur ? '/dashboard' : '/inscription'} className="flex items-center gap-1.5 hover:text-green-700">
             <FolderOpen size={15} /> Mes Demandes
           </Link>
           <Link to="/recuperer-acte" className="flex items-center gap-1.5 hover:text-green-700">
@@ -74,15 +67,25 @@ export default function Accueil() {
             <HelpCircle size={15} /> Aide
           </Link>
         </div>
-        <Link to="/connexion"
-          className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
-          Se connecter
-        </Link>
+        {utilisateur ? (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-sm">
+              {utilisateur.prenom?.[0]}{utilisateur.nom?.[0]}
+            </div>
+            <span className="text-sm text-gray-700 hidden md:block">{utilisateur.prenom}</span>
+            <button onClick={() => logout()}
+              className="flex items-center gap-1 text-sm text-red-500 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">
+              <LogOut size={14} /> Déconnexion
+            </button>
+          </div>
+        ) : (
+          <Link to="/connexion" className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+            Se connecter
+          </Link>
+        )}
       </nav>
 
-      {/* HERO */}
-      <div className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 40%, #a3e635 100%)' }}>
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 40%, #a3e635 100%)' }}>
         <div className="max-w-6xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center gap-10">
           <div className="flex-1 text-white">
             <span className="inline-block bg-white bg-opacity-20 text-white text-xs px-4 py-1 rounded-full mb-6">
@@ -95,12 +98,10 @@ export default function Accueil() {
               Un portail moderne et sécurisé pour faciliter vos démarches administratives. Simple, rapide et accessible 24h/24.
             </p>
             <div className="flex gap-4">
-              <Link to="/inscription"
-                className="bg-white text-green-700 font-bold px-6 py-3 rounded-lg hover:bg-green-50 transition flex items-center gap-2">
+              <Link to="/inscription" className="bg-white text-green-700 font-bold px-6 py-3 rounded-lg hover:bg-green-50 transition flex items-center gap-2">
                 Faire une demande <PlusCircle size={16} />
               </Link>
-              <Link to="/connexion"
-                className="border border-white text-white px-6 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
+              <Link to="/connexion" className="border border-white text-white px-6 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition">
                 Se connecter
               </Link>
             </div>
@@ -120,8 +121,6 @@ export default function Accueil() {
               ))}
             </div>
           </div>
-
-          {/* Card démo */}
           <div className="flex-1 max-w-md w-full">
             <div className="bg-white rounded-2xl shadow-xl p-6">
               <p className="font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -144,15 +143,12 @@ export default function Accueil() {
                   </div>
                 ))}
               </div>
-              <Link to="/inscription"
-                className="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition block text-center">
+              <Link to="/inscription" className="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition block text-center">
                 Créer mon compte gratuit
               </Link>
             </div>
           </div>
         </div>
-
-        {/* Vague */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 60L1440 60L1440 30C1200 0 960 60 720 30C480 0 240 60 0 30L0 60Z" fill="white"/>
@@ -160,17 +156,14 @@ export default function Accueil() {
         </div>
       </div>
 
-      {/* SERVICES */}
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-gray-900 mb-3">Nos Services</h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
-            Accédez à l'ensemble des services administratifs des mairies de Douala en quelques clics
-          </p>
+          <p className="text-gray-500 max-w-xl mx-auto">Accédez à l'ensemble des services administratifs des mairies de Douala en quelques clics</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {services.map(({ Icon, couleur, label, desc, key }) => (
-            <Link to="/inscription" key={key}
+            <Link to={utilisateur ? '/demande' : '/inscription'} key={key}
               className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md hover:border-green-200 transition group">
               <div className={`w-12 h-12 ${couleur} rounded-xl flex items-center justify-center mb-3`}>
                 <Icon size={22} color="white" strokeWidth={1.8} />
@@ -182,37 +175,31 @@ export default function Accueil() {
         </div>
       </div>
 
-      {/* ARRONDISSEMENTS */}
       <div className="bg-gray-50 py-16 px-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Arrondissements de Douala</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {arrondissements.map((arr) => (
-              <div key={arr}
-                className="bg-white rounded-xl px-5 py-4 flex items-center gap-3 border border-gray-100 hover:border-green-300 hover:shadow-sm transition cursor-pointer">
+              <div key={arr} className="bg-white rounded-xl px-5 py-4 flex items-center gap-3 border border-gray-100 hover:border-green-300 hover:shadow-sm transition cursor-pointer">
                 <MapPin size={16} className="text-green-600 flex-shrink-0" />
                 <span className="text-sm font-medium text-gray-700">{arr}</span>
               </div>
             ))}
           </div>
           <div className="text-center mt-8">
-            <Link to="/inscription"
-              className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+            <Link to={utilisateur ? '/demande' : '/inscription'} className="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
               Commencer une demande
             </Link>
           </div>
         </div>
       </div>
 
-      {/* COMMENT CA MARCHE */}
       <div className="max-w-5xl mx-auto px-6 py-16">
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-10">Comment ça marche ?</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
           {etapes.map(({ step, Icon, title, desc }) => (
             <div key={step} className="flex flex-col items-center">
-              <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mb-4 text-sm">
-                {step}
-              </div>
+              <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mb-4 text-sm">{step}</div>
               <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-3">
                 <Icon size={22} className="text-green-600" />
               </div>
@@ -223,7 +210,6 @@ export default function Accueil() {
         </div>
       </div>
 
-      {/* FOOTER */}
       <footer className="bg-gray-900 text-gray-400 py-12 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -233,9 +219,7 @@ export default function Accueil() {
               </div>
               <p className="font-bold text-white">e-Mairie Douala</p>
             </div>
-            <p className="text-sm leading-relaxed">
-              Portail officiel de la Ville de Douala pour faciliter vos démarches administratives en ligne.
-            </p>
+            <p className="text-sm leading-relaxed">Portail officiel de la Ville de Douala pour faciliter vos démarches administratives en ligne.</p>
           </div>
           <div>
             <p className="font-semibold text-white mb-3">Liens Rapides</p>
@@ -251,7 +235,7 @@ export default function Accueil() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2"><MapPin size={13} /> Hôtel de Ville, Douala</div>
               <div className="flex items-center gap-2"><Smartphone size={13} /> +237 233 42 66 00</div>
-              <div className="flex items-center gap-2"><FileText size={13} /> contact@douala.cm</div>
+              <div className="flex items-center gap-2"><Mail size={13} /> contact@douala.cm</div>
             </div>
           </div>
           <div>
@@ -269,8 +253,7 @@ export default function Accueil() {
           <p>© 2026 Communauté Urbaine de Douala. Tous droits réservés.</p>
           <div className="flex gap-4">
             <Share2 size={18} className="hover:text-white cursor-pointer" />
-            <Share2 size={18} className="hover:text-white cursor-pointer" />
-            <Share2 size={18} className="hover:text-white cursor-pointer" />
+            <Mail size={18} className="hover:text-white cursor-pointer" />
           </div>
         </div>
       </footer>
@@ -279,4 +262,3 @@ export default function Accueil() {
     </div>
   );
 }
-

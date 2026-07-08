@@ -72,9 +72,7 @@ export default function Dashboard() {
           <button className="flex items-center gap-2 text-sm text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50">
             <SlidersHorizontal size={14} /> Filtres avancés
           </button>
-          <button className="flex items-center gap-2 text-sm text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50">
-            <Download size={14} /> Exporter
-          </button>
+    
         </div>
 
         {/* Liste des demandes */}

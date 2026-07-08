@@ -10,6 +10,8 @@ import RecupererActe from './pages/citoyen/RecupererActe';
 import Aide from './pages/citoyen/Aide';
 import ConnexionAdmin from './pages/admin/ConnexionAdmin';
 import DashboardAdmin from './pages/admin/DashboardAdmin';
+import MotDePasseOublie from './pages/citoyen/MotDePasseOublie';
+import ReinitialisationMotDePasse from './pages/citoyen/ReinitialisationMotDePasse';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           <Route path="/demande" element={<ProtectedRoute><Demande /></ProtectedRoute>} />
           <Route path="/admin/connexion" element={<ConnexionAdmin />} />
           <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+          <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+          <Route path="/reinitialiser-mot-de-passe" element={<ReinitialisationMotDePasse />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -161,5 +161,30 @@ const envoyerEmailRejet = async (email, nom, typeActe, raisonRejet) => {
     `
   });
 };
+const envoyerEmailReinitialisaton = async (email, nom, lien) => {
+  await transporter.sendMail({
+    from: `"e-Mairie Douala" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: 'Réinitialisation de votre mot de passe — e-Mairie Douala',
+    html: `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+      ${headerHTML('Réinitialisation mot de passe')}
+      <div style="padding:32px;">
+        <p style="font-size:15px;color:#374151;margin:0 0 8px;">Bonjour <strong>${nom}</strong>,</p>
+        <p style="font-size:14px;color:#6b7280;margin:0 0 24px;">
+          Vous avez demandé la réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.
+        </p>
+        <div style="text-align:center;margin:32px 0;">
+          <a href="${lien}" style="background:#15803d;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:15px;display:inline-block;">
+            Réinitialiser mon mot de passe
+          </a>
+        </div>
+        ${infoBox('Attention', 'Ce lien est valable pendant 1 heure. Si vous n\'avez pas fait cette demande, ignorez cet email.', '#fefce8', '#fde68a', '#92400e')}
+        ${footerHTML()}
+      </div>
+    </div>
+    `
+  });
+};
 
-module.exports = { envoyerEmailCodeUnique, envoyerEmailAcceptation, envoyerEmailRejet };
+module.exports = { envoyerEmailCodeUnique, envoyerEmailAcceptation, envoyerEmailRejet, envoyerEmailReinitialisaton };

@@ -109,7 +109,7 @@ export default function Connexion() {
             <div>
               <div className="flex justify-between mb-1">
                 <label className="block text-sm font-medium text-gray-700">Mot de passe *</label>
-                <a href="#" className="text-xs text-green-600 hover:underline">Mot de passe oublié ?</a>
+                <Link to="/mot-de-passe-oublie" className="text-xs text-green-600 hover:underline">Mot de passe oublié ?</Link>
               </div>
               <div className="relative">
                 <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />

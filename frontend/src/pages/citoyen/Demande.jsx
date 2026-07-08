@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Baby, Heart, Cross, Home, CheckSquare, Briefcase,
   FileCheck, MapPin, Flag, Users, Camera, Folder,
-  CheckCircle, ArrowLeft, Building2
+  CheckCircle, ArrowLeft, Building2, AlertCircle
 } from 'lucide-react';
 
 const ACTES_CONFIG = {
@@ -122,6 +122,7 @@ export default function Demande() {
   const [etape, setEtape] = useState(1);
   const [typeActe, setTypeActe] = useState('');
   const [formData, setFormData] = useState({});
+  const [erreursChamps, setEreursChamps] = useState({});
   const [fichiers, setFichiers] = useState({});
   const [erreur, setErreur] = useState('');
   const [chargement, setChargement] = useState(false);
@@ -129,7 +130,13 @@ export default function Demande() {
   const [codeUnique, setCodeUnique] = useState('');
 
   const config = ACTES_CONFIG[typeActe];
-  const handleChamp = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleChamp = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (erreursChamps[e.target.name]) {
+      setEreursChamps(prev => ({ ...prev, [e.target.name]: '' }));
+    }
+  };
 
   const handleFichier = (index, file) => {
     if (file) setFichiers(prev => ({ ...prev, [index]: file }));
@@ -137,6 +144,22 @@ export default function Demande() {
 
   const supprimerFichier = (index) => {
     setFichiers(prev => { const c = { ...prev }; delete c[index]; return c; });
+  };
+
+  const validerEtape2 = () => {
+    const erreurs = {};
+    config.champs.forEach(champ => {
+      const valeur = formData[champ.name];
+      if (!valeur || valeur.toString().trim() === '') {
+        erreurs[champ.name] = 'Ce champ est obligatoire';
+      }
+    });
+    if (Object.keys(erreurs).length > 0) {
+      setEreursChamps(erreurs);
+      return false;
+    }
+    setEreursChamps({});
+    return true;
   };
 
   const handleSubmit = async () => {
@@ -191,7 +214,6 @@ export default function Demande() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
       <nav className="bg-green-600 text-white px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Building2 size={20} />
@@ -204,7 +226,7 @@ export default function Demande() {
       </nav>
 
       <div className="max-w-2xl mx-auto py-8 px-4">
-        {/* Étapes */}
+        {/* Indicateur d'étapes */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {['Choisir', 'Formulaire', 'Documents'].map((label, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -221,7 +243,8 @@ export default function Demande() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6">
-          {/* Étape 1 — Choisir */}
+
+          {/* ÉTAPE 1 — Choisir l'acte */}
           {etape === 1 && (
             <>
               <h2 className="text-xl font-bold text-gray-800 mb-4">Choisissez votre acte</h2>
@@ -240,14 +263,15 @@ export default function Demande() {
                   );
                 })}
               </div>
-              <button onClick={() => setEtape(2)} disabled={!typeActe}
-                className="w-full mt-6 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-40 transition">
+              <button onClick={() => { if (typeActe) setEtape(2); }}
+                disabled={!typeActe}
+                className="w-full mt-6 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
                 Continuer →
               </button>
             </>
           )}
 
-          {/* Étape 2 — Formulaire */}
+          {/* ÉTAPE 2 — Formulaire */}
           {etape === 2 && config && (
             <>
               <div className="flex items-center gap-3 mb-4">
@@ -256,37 +280,64 @@ export default function Demande() {
                 </div>
                 <h2 className="text-xl font-bold text-gray-800">{config.label}</h2>
               </div>
+
+              {Object.keys(erreursChamps).some(k => erreursChamps[k]) && (
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
+                  <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
+                  <p className="text-sm text-red-700">Veuillez remplir tous les champs obligatoires avant de continuer.</p>
+                </div>
+              )}
+
               <div className="space-y-4">
                 {config.champs.map((champ) => (
                   <div key={champ.name}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{champ.label} *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {champ.label} <span className="text-red-500">*</span>
+                    </label>
                     {champ.type === 'select' ? (
-                      <select name={champ.name} value={formData[champ.name] || ''} onChange={handleChamp}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                      <select
+                        name={champ.name}
+                        value={formData[champ.name] || ''}
+                        onChange={handleChamp}
+                        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition
+                          ${erreursChamps[champ.name] ? 'border-red-400 bg-red-50 focus:ring-red-400' : 'border-gray-200'}`}>
                         <option value="">Sélectionner...</option>
                         {champ.options.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     ) : (
-                      <input type={champ.type} name={champ.name} value={formData[champ.name] || ''} onChange={handleChamp}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                      <input
+                        type={champ.type}
+                        name={champ.name}
+                        value={formData[champ.name] || ''}
+                        onChange={handleChamp}
+                        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition
+                          ${erreursChamps[champ.name] ? 'border-red-400 bg-red-50 focus:ring-red-400' : 'border-gray-200'}`}
+                      />
+                    )}
+                    {erreursChamps[champ.name] && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertCircle size={12} className="text-red-500" />
+                        <p className="text-red-500 text-xs">{erreursChamps[champ.name]}</p>
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
+
               <div className="flex gap-3 mt-6">
-                <button onClick={() => setEtape(1)}
+                <button onClick={() => { setEtape(1); setEreursChamps({}); }}
                   className="flex-1 border border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 flex items-center justify-center gap-2">
                   <ArrowLeft size={16} /> Retour
                 </button>
-                <button onClick={() => setEtape(3)}
-                  className="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700">
+                <button onClick={() => { if (validerEtape2()) setEtape(3); }}
+                  className="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition">
                   Continuer →
                 </button>
               </div>
             </>
           )}
 
-          {/* Étape 3 — Documents */}
+          {/* ÉTAPE 3 — Documents */}
           {etape === 3 && config && (
             <>
               <h2 className="text-xl font-bold text-gray-800 mb-2">Documents à fournir</h2>
@@ -325,8 +376,9 @@ export default function Demande() {
                     {fichiers[i] && (
                       <div className="mt-2 flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
                         <span className="text-xs text-gray-600 truncate">{fichiers[i].name}</span>
-                        <button onClick={() => supprimerFichier(i)} className="text-red-500 text-xs ml-2 hover:text-red-700">
-                          <Cross size={12} />
+                        <button onClick={() => supprimerFichier(i)}
+                          className="text-red-500 text-xs ml-2 hover:text-red-700 flex items-center gap-1">
+                          <Cross size={12} /> Supprimer
                         </button>
                       </div>
                     )}
@@ -335,8 +387,9 @@ export default function Demande() {
               </div>
 
               {erreur && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4 text-sm">
-                  {erreur}
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
+                  <AlertCircle size={16} className="text-red-500" />
+                  <p className="text-sm text-red-700">{erreur}</p>
                 </div>
               )}
 
@@ -352,7 +405,7 @@ export default function Demande() {
                   <ArrowLeft size={16} /> Retour
                 </button>
                 <button onClick={handleSubmit} disabled={chargement}
-                  className="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2">
+                  className="flex-1 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2 transition">
                   <CheckCircle size={16} /> {chargement ? 'Envoi...' : 'Soumettre'}
                 </button>
               </div>
