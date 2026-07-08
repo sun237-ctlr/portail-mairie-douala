@@ -23,7 +23,7 @@ export default function AssistantIA() {
     setInput('');
     setChargement(true);
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const apiBase = import.meta.env.VITE_API_URL || window.location.origin;
       const res = await axios.post(`${apiBase}/api/ia/chat`, { messages: nouveauxMessages });
       setMessages([...nouveauxMessages, { role: 'assistant', content: res.data.message }]);
     } catch {

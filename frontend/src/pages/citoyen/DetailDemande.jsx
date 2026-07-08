@@ -143,7 +143,7 @@ export default function DetailDemande() {
                         <p className="font-semibold text-gray-800">{doc.nom}</p>
                         <p className="text-xs text-gray-500">Type : {doc.type}</p>
                       </div>
-                      <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${doc.url}`} target="_blank" rel="noreferrer"
+                      <a href={`${import.meta.env.VITE_API_URL || window.location.origin}${doc.url}`} target="_blank" rel="noreferrer"
                         className="text-sm text-green-700 font-semibold hover:text-green-900">
                         Voir
                       </a>

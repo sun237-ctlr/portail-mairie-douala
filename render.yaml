@@ -17,6 +17,7 @@ services:
       - key: EMAIL_PASS
         sync: false
       - key: FRONTEND_URL
+        value: https://portail-mairie-frontend.onrender.com
         sync: false
 
   - type: static
@@ -27,6 +28,11 @@ services:
     root: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
     envVars:
       - key: VITE_API_URL
+        value: https://portail-mairie-backend.onrender.com
         sync: false

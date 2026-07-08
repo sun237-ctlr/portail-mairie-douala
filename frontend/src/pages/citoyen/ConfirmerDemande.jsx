@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api`;
+const apiUrl = `${import.meta.env.VITE_API_URL || window.location.origin}/api`;
 
 export default function ConfirmerDemande() {
   const { codeUnique } = useParams();

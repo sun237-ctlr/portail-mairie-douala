@@ -88,7 +88,7 @@ export default function DashboardAdmin() {
   const handleFixerRendezVous = async () => {
     if (!dateRdv) { setMessage('Veuillez sélectionner une date'); return; }
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const apiBase = import.meta.env.VITE_API_URL || window.location.origin;
       const response = await fetch(`${apiBase}/api/admin/demandes/${demandeSelectionnee.id}/confirmer`, {
         method: 'PATCH',
         headers: {
@@ -350,7 +350,7 @@ export default function DashboardAdmin() {
                                         <p className="text-xs text-gray-500">{doc.type} • {(new Date(doc.createdAt)).toLocaleDateString('fr-FR')}</p>
                                       </div>
                                     </div>
-                                    <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${doc.url}`} target="_blank" rel="noopener noreferrer"
+                                    <a href={`${import.meta.env.VITE_API_URL || window.location.origin}${doc.url}`} target="_blank" rel="noopener noreferrer"
                                       className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition flex items-center gap-1">
                                       <FileText size={12} /> Voir
                                     </a>
