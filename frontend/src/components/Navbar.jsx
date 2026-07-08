@@ -1,5 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLangue } from '../context/LangueContext';
+import BoutonLangue from './BoutonLangue';
 import {
   FileText, PlusCircle, FolderOpen,
   Download, HelpCircle, LayoutDashboard, LogOut
@@ -7,20 +9,20 @@ import {
 
 export default function Navbar() {
   const { utilisateur, logout } = useAuth();
+  const { t } = useLangue();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => { logout(); navigate('/'); };
+  const actif = (path) => location.pathname === path;
 
   const liens = [
-    { label: 'Accueil', path: '/', Icon: LayoutDashboard },
-    { label: 'Nouvelle Demande', path: utilisateur ? '/demande' : '/inscription', Icon: PlusCircle },
-    { label: 'Mes Demandes', path: utilisateur ? '/dashboard' : '/inscription', Icon: FolderOpen },
-    { label: 'Récupérer Acte', path: utilisateur ? '/recuperer-acte' : '/inscription', Icon: Download },
-    { label: 'Aide', path: '/aide', Icon: HelpCircle },
+    { label: t.accueil, path: '/', Icon: LayoutDashboard },
+    { label: t.nouvelleDemande, path: utilisateur ? '/demande' : '/inscription', Icon: PlusCircle },
+    { label: t.mesDemandes, path: utilisateur ? '/dashboard' : '/inscription', Icon: FolderOpen },
+    { label: t.recupererActe, path: '/recuperer-acte', Icon: Download },
+    { label: t.aide, path: '/aide', Icon: HelpCircle },
   ];
-
-  const actif = (path) => location.pathname === path;
 
   return (
     <nav className="bg-white border-b border-gray-100 px-6 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm">
@@ -34,20 +36,18 @@ export default function Navbar() {
         </div>
       </Link>
 
-      <div className="hidden md:flex items-center gap-5 text-sm">
+      <div className="hidden md:flex items-center gap-4 text-sm">
         {liens.map(({ label, path, Icon }) => (
-          <Link key={label} to={path}
+          <Link key={path} to={path}
             className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition font-medium
-              ${actif(path)
-                ? 'text-green-700 bg-green-50'
-                : 'text-gray-600 hover:text-green-700 hover:bg-green-50'}`}>
-            <Icon size={15} />
-            {label}
+              ${actif(path) ? 'text-green-700 bg-green-50' : 'text-gray-600 hover:text-green-700 hover:bg-green-50'}`}>
+            <Icon size={15} /> {label}
           </Link>
         ))}
       </div>
 
       <div className="flex items-center gap-3">
+        <BoutonLangue />
         {utilisateur ? (
           <>
             <div className="hidden md:flex items-center gap-2">
@@ -58,13 +58,13 @@ export default function Navbar() {
             </div>
             <button onClick={handleLogout}
               className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">
-              <LogOut size={14} /> Déconnexion
+              <LogOut size={14} /> {t.deconnexion}
             </button>
           </>
         ) : (
           <Link to="/connexion"
             className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
-            Se connecter
+            {t.seConnecter}
           </Link>
         )}
       </div>

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { LangueProvider } from './context/LangueContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Accueil from './pages/Accueil';
 import Inscription from './pages/citoyen/Inscription';
@@ -8,30 +9,32 @@ import Dashboard from './pages/citoyen/Dashboard';
 import Demande from './pages/citoyen/Demande';
 import RecupererActe from './pages/citoyen/RecupererActe';
 import Aide from './pages/citoyen/Aide';
-import ConnexionAdmin from './pages/admin/ConnexionAdmin';
-import DashboardAdmin from './pages/admin/DashboardAdmin';
 import MotDePasseOublie from './pages/citoyen/MotDePasseOublie';
 import ReinitialisationMotDePasse from './pages/citoyen/ReinitialisationMotDePasse';
+import ConnexionAdmin from './pages/admin/ConnexionAdmin';
+import DashboardAdmin from './pages/admin/DashboardAdmin';
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Accueil />} />
-          <Route path="/inscription" element={<Inscription />} />
-          <Route path="/connexion" element={<Connexion />} />
-          <Route path="/aide" element={<Aide />} />
-          <Route path="/recuperer-acte" element={<RecupererActe />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/demande" element={<ProtectedRoute><Demande /></ProtectedRoute>} />
-          <Route path="/admin/connexion" element={<ConnexionAdmin />} />
-          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
-          <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
-          <Route path="/reinitialiser-mot-de-passe" element={<ReinitialisationMotDePasse />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <LangueProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Accueil />} />
+            <Route path="/inscription" element={<Inscription />} />
+            <Route path="/connexion" element={<Connexion />} />
+            <Route path="/aide" element={<Aide />} />
+            <Route path="/recuperer-acte" element={<RecupererActe />} />
+            <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+            <Route path="/reinitialiser-mot-de-passe" element={<ReinitialisationMotDePasse />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/demande" element={<ProtectedRoute><Demande /></ProtectedRoute>} />
+            <Route path="/admin/connexion" element={<ConnexionAdmin />} />
+            <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </LangueProvider>
   );
 }
 

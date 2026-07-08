@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
+const { verifierCNI } = require('../utils/verificationCNI');
 
 const prisma = new PrismaClient();
 
@@ -47,6 +48,20 @@ router.post('/inscription', upload.fields([
       return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
+    // Vérification CNI par IA
+    const cheminRecto = `uploads/${req.files.cniRecto[0].filename}`;
+    const cheminVerso = `uploads/${req.files.cniVerso[0].filename}`;
+
+    const verifRecto = await verifierCNI(cheminRecto);
+    if (!verifRecto.valide) {
+      return res.status(400).json({ message: `CNI Recto : ${verifRecto.message}` });
+    }
+
+    const verifVerso = await verifierCNI(cheminVerso);
+    if (!verifVerso.valide) {
+      return res.status(400).json({ message: `CNI Verso : ${verifVerso.message}` });
+    }
+
     const motDePasseHash = await bcrypt.hash(motDePasse, 10);
 
     const utilisateur = await prisma.utilisateur.create({
@@ -54,8 +69,8 @@ router.post('/inscription', upload.fields([
         nom, prenom, email,
         motDePasse: motDePasseHash,
         telephone,
-        cniRecto: `/uploads/${req.files.cniRecto[0].filename}`,
-        cniVerso: `/uploads/${req.files.cniVerso[0].filename}`,
+        cniRecto: `/${cheminRecto}`,
+        cniVerso: `/${cheminVerso}`,
       }
     });
 
@@ -127,7 +142,8 @@ router.post('/admin/connexion', async (req, res) => {
     res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 });
-// Réinitialisation mot de passe
+
+// Mot de passe oublié
 router.post('/mot-de-passe-oublie', async (req, res) => {
   try {
     const { email } = req.body;
@@ -135,7 +151,11 @@ router.post('/mot-de-passe-oublie', async (req, res) => {
     if (!utilisateur) {
       return res.json({ message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
     }
-    const token = jwt.sign({ id: utilisateur.id, email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: utilisateur.id, email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
     const lien = `${process.env.FRONTEND_URL}/reinitialiser-mot-de-passe?token=${token}`;
     const { envoyerEmailReinitialisaton } = require('../utils/emailService');
     await envoyerEmailReinitialisaton(email, utilisateur.prenom, lien);
@@ -145,6 +165,7 @@ router.post('/mot-de-passe-oublie', async (req, res) => {
   }
 });
 
+// Réinitialiser mot de passe
 router.post('/reinitialiser-mot-de-passe', async (req, res) => {
   try {
     const { token, nouveauMotDePasse } = req.body;

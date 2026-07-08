@@ -4,6 +4,8 @@ import { getMesDemandes } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import AssistantIA from '../../components/AssistantIA';
 import Navbar from '../../components/Navbar';
+import { useLangue } from '../../context/LangueContext';
+import BoutonLangue from '../../components/BoutonLangue';
 import { FileText, PlusCircle, Clock, CheckCircle, XCircle, Search, SlidersHorizontal, Download, Calendar } from 'lucide-react';
 
 const statutConfig = {
@@ -21,6 +23,7 @@ export default function Dashboard() {
   const [demandes, setDemandes] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [recherche, setRecherche] = useState('');
+  const { t } = useLangue();
 
   useEffect(() => {
     if (!utilisateur) { navigate('/connexion'); return; }
@@ -34,6 +37,14 @@ export default function Dashboard() {
     d.typeActe.toLowerCase().includes(recherche.toLowerCase())
   );
 
+const statutConfig = {
+  EN_ATTENTE: { label: t.statutEnAttente, couleur: 'bg-yellow-100 text-yellow-700', Icon: Clock },
+  VERIFICATION_EN_COURS: { label: t.statutVerification, couleur: 'bg-blue-100 text-blue-700', Icon: Clock },
+  ACCEPTE: { label: t.statutAccepte, couleur: 'bg-green-100 text-green-700', Icon: CheckCircle },
+  REJETE: { label: t.statutRejete, couleur: 'bg-red-100 text-red-700', Icon: XCircle },
+  RENDEZ_VOUS_PROGRAMME: { label: t.statutRdv, couleur: 'bg-purple-100 text-purple-700', Icon: Calendar },
+  ACTE_DISPONIBLE: { label: t.statutDisponible, couleur: 'bg-teal-100 text-teal-700', Icon: CheckCircle },
+};
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
