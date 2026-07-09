@@ -12,123 +12,116 @@ import {
 export default function Demande() {
   const navigate = useNavigate();
   const { utilisateur } = useAuth();
-  const { t } = useLangue();
+  const { t, langue } = useLangue();
 
   const ACTES_CONFIG = {
     ACTE_NAISSANCE: {
       label: t.acteNaissance, Icon: Baby, couleur: 'bg-blue-500',
       champs: [
-        { name: 'nomEnfant', label: t.langue === 'en' ? "Child's last name" : "Nom de l'enfant", type: 'text' },
-        { name: 'prenomEnfant', label: t.langue === 'en' ? "Child's first name" : "Prénom de l'enfant", type: 'text' },
-        { name: 'dateNaissance', label: t.langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
-        { name: 'lieuNaissance', label: t.langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
-        { name: 'nomPere', label: t.langue === 'en' ? "Father's full name" : 'Nom complet du père', type: 'text' },
-        { name: 'nomMere', label: t.langue === 'en' ? "Mother's full name" : 'Nom complet de la mère', type: 'text' },
-        { name: 'parents', label: t.langue === 'en' ? 'Married parents?' : 'Parents mariés ?', type: 'select', options: [t.langue === 'en' ? 'Yes' : 'Oui', t.langue === 'en' ? 'No' : 'Non'] },
+        { name: 'nomEnfant', label: langue === 'en' ? "Child's last name" : "Nom de l'enfant", type: 'text' },
+        { name: 'prenomEnfant', label: langue === 'en' ? "Child's first name" : "Prénom de l'enfant", type: 'text' },
+        { name: 'dateNaissance', label: langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
+        { name: 'lieuNaissance', label: langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
+        { name: 'nomPere', label: langue === 'en' ? "Father's full name" : 'Nom complet du père', type: 'text' },
+        { name: 'nomMere', label: langue === 'en' ? "Mother's full name" : 'Nom complet de la mère', type: 'text' },
+        { name: 'parents', label: langue === 'en' ? 'Married parents?' : 'Parents mariés ?', type: 'select', options: [langue === 'en' ? 'Yes' : 'Oui', langue === 'en' ? 'No' : 'Non'] },
       ],
-      documents: t.langue === 'en' ? [
-        'Birth declaration (hospital)',
-        "Father's NIC", "Mother's NIC",
-        'Marriage certificate (if married) or 2 witnesses NIC (if not married)',
-      ] : [
-        'Déclaration de naissance (hôpital)',
-        'CNI du père', 'CNI de la mère',
-        'Acte de mariage (si mariés) ou CNI de 2 témoins (si non mariés)',
-      ],
+      documents: langue === 'en' ? ['Birth declaration (hospital)', "Father's NIC", "Mother's NIC", 'Marriage certificate (if married) or 2 witnesses NIC (if not)'] :
+        ['Déclaration de naissance (hôpital)', 'CNI du père', 'CNI de la mère', 'Acte de mariage (si mariés) ou CNI de 2 témoins'],
     },
     ACTE_MARIAGE: {
       label: t.acteMariage, Icon: Heart, couleur: 'bg-pink-500',
       champs: [
-        { name: 'nomEpoux', label: t.langue === 'en' ? "Husband's full name" : "Nom complet de l'époux", type: 'text' },
-        { name: 'nomEpouse', label: t.langue === 'en' ? "Wife's full name" : "Nom complet de l'épouse", type: 'text' },
-        { name: 'dateMariage', label: t.langue === 'en' ? 'Wedding date' : 'Date du mariage', type: 'date' },
-        { name: 'lieuMariage', label: t.langue === 'en' ? 'Wedding location' : 'Lieu du mariage', type: 'text' },
+        { name: 'nomEpoux', label: langue === 'en' ? "Husband's full name" : "Nom complet de l'époux", type: 'text' },
+        { name: 'nomEpouse', label: langue === 'en' ? "Wife's full name" : "Nom complet de l'épouse", type: 'text' },
+        { name: 'dateMariage', label: langue === 'en' ? 'Wedding date' : 'Date du mariage', type: 'date' },
+        { name: 'lieuMariage', label: langue === 'en' ? 'Wedding location' : 'Lieu du mariage', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Husband's NIC", "Wife's NIC", "Husband's birth certificate", "Wife's birth certificate"] :
+      documents: langue === 'en' ? ["Husband's NIC", "Wife's NIC", "Husband's birth certificate", "Wife's birth certificate"] :
         ["CNI de l'époux", "CNI de l'épouse", "Acte de naissance époux", "Acte de naissance épouse"],
     },
     ACTE_DECES: {
       label: t.acteDeces, Icon: Cross, couleur: 'bg-gray-500',
       champs: [
-        { name: 'nomDefunt', label: t.langue === 'en' ? "Deceased's full name" : 'Nom complet du défunt', type: 'text' },
-        { name: 'dateDeces', label: t.langue === 'en' ? 'Date of death' : 'Date du décès', type: 'date' },
-        { name: 'lieuDeces', label: t.langue === 'en' ? 'Place of death' : 'Lieu du décès', type: 'text' },
-        { name: 'nomDeclarant', label: t.langue === 'en' ? "Declarant's name" : 'Nom du déclarant', type: 'text' },
+        { name: 'nomDefunt', label: langue === 'en' ? "Deceased's full name" : 'Nom complet du défunt', type: 'text' },
+        { name: 'dateDeces', label: langue === 'en' ? 'Date of death' : 'Date du décès', type: 'date' },
+        { name: 'lieuDeces', label: langue === 'en' ? 'Place of death' : 'Lieu du décès', type: 'text' },
+        { name: 'nomDeclarant', label: langue === 'en' ? "Declarant's name" : 'Nom du déclarant', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Deceased's NIC", "Medical death certificate", "Declarant's NIC"] :
+      documents: langue === 'en' ? ["Deceased's NIC", "Medical death certificate", "Declarant's NIC"] :
         ["CNI du défunt", "Certificat médical de décès", "CNI du déclarant"],
     },
     CERTIFICAT_RESIDENCE: {
       label: t.certResidence, Icon: Home, couleur: 'bg-green-500',
       champs: [
-        { name: 'nomComplet', label: t.langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
-        { name: 'adresse', label: t.langue === 'en' ? 'Full address' : 'Adresse complète', type: 'text' },
-        { name: 'quartier', label: t.langue === 'en' ? 'Neighborhood' : 'Quartier', type: 'text' },
-        { name: 'dureeResidence', label: t.langue === 'en' ? 'Length of residence' : 'Durée de résidence', type: 'text' },
+        { name: 'nomComplet', label: langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
+        { name: 'adresse', label: langue === 'en' ? 'Full address' : 'Adresse complète', type: 'text' },
+        { name: 'quartier', label: langue === 'en' ? 'Neighborhood' : 'Quartier', type: 'text' },
+        { name: 'dureeResidence', label: langue === 'en' ? 'Length of residence' : 'Durée de résidence', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Applicant's NIC", "Recent water or electricity bill"] :
+      documents: langue === 'en' ? ["Applicant's NIC", "Recent water or electricity bill"] :
         ["CNI du demandeur", "Facture d'eau ou électricité récente"],
     },
     CERTIFICAT_VIE: {
       label: t.certVie, Icon: CheckSquare, couleur: 'bg-teal-500',
       champs: [
-        { name: 'nomComplet', label: t.langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
-        { name: 'dateNaissance', label: t.langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
-        { name: 'lieuNaissance', label: t.langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
+        { name: 'nomComplet', label: langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
+        { name: 'dateNaissance', label: langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
+        { name: 'lieuNaissance', label: langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Applicant's NIC"] : ["CNI du demandeur"],
+      documents: langue === 'en' ? ["Applicant's NIC"] : ["CNI du demandeur"],
     },
     CERTIFICAT_CELIBAT: {
       label: t.certCelibat, Icon: Briefcase, couleur: 'bg-orange-500',
       champs: [
-        { name: 'nomComplet', label: t.langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
-        { name: 'dateNaissance', label: t.langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
-        { name: 'lieuNaissance', label: t.langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
-        { name: 'profession', label: t.langue === 'en' ? 'Occupation' : 'Profession', type: 'text' },
+        { name: 'nomComplet', label: langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
+        { name: 'dateNaissance', label: langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
+        { name: 'lieuNaissance', label: langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
+        { name: 'profession', label: langue === 'en' ? 'Occupation' : 'Profession', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Applicant's NIC", "Birth certificate"] : ["CNI du demandeur", "Acte de naissance"],
+      documents: langue === 'en' ? ["Applicant's NIC", "Birth certificate"] : ["CNI du demandeur", "Acte de naissance"],
     },
     LEGALISATION_DOCUMENTS: {
       label: t.legalisation, Icon: FileCheck, couleur: 'bg-purple-500',
       champs: [
-        { name: 'nomComplet', label: t.langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
-        { name: 'typeDocument', label: t.langue === 'en' ? 'Type of document to legalize' : 'Type de document à légaliser', type: 'text' },
-        { name: 'nombreCopies', label: t.langue === 'en' ? 'Number of copies' : 'Nombre de copies', type: 'number' },
+        { name: 'nomComplet', label: langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
+        { name: 'typeDocument', label: langue === 'en' ? 'Type of document to legalize' : 'Type de document à légaliser', type: 'text' },
+        { name: 'nombreCopies', label: langue === 'en' ? 'Number of copies' : 'Nombre de copies', type: 'number' },
       ],
-      documents: t.langue === 'en' ? ["Applicant's NIC", "Original document to legalize"] :
+      documents: langue === 'en' ? ["Applicant's NIC", "Original document to legalize"] :
         ["CNI du demandeur", "Document original à légaliser"],
     },
     ATTESTATION_DOMICILE: {
       label: t.attestDomicile, Icon: MapPin, couleur: 'bg-red-500',
       champs: [
-        { name: 'nomComplet', label: t.langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
-        { name: 'adresse', label: t.langue === 'en' ? 'Full address' : 'Adresse complète', type: 'text' },
-        { name: 'quartier', label: t.langue === 'en' ? 'Neighborhood' : 'Quartier', type: 'text' },
+        { name: 'nomComplet', label: langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
+        { name: 'adresse', label: langue === 'en' ? 'Full address' : 'Adresse complète', type: 'text' },
+        { name: 'quartier', label: langue === 'en' ? 'Neighborhood' : 'Quartier', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Applicant's NIC", "Recent bill (water/electricity)"] :
+      documents: langue === 'en' ? ["Applicant's NIC", "Recent bill (water/electricity)"] :
         ["CNI du demandeur", "Facture récente (eau/électricité)"],
     },
     CERTIFICAT_NATIONALITE: {
       label: t.certNationalite, Icon: Flag, couleur: 'bg-yellow-500',
       champs: [
-        { name: 'nomComplet', label: t.langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
-        { name: 'dateNaissance', label: t.langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
-        { name: 'lieuNaissance', label: t.langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
-        { name: 'nomPere', label: t.langue === 'en' ? "Father's name" : 'Nom du père', type: 'text' },
+        { name: 'nomComplet', label: langue === 'en' ? 'Full name' : 'Nom complet', type: 'text' },
+        { name: 'dateNaissance', label: langue === 'en' ? 'Date of birth' : 'Date de naissance', type: 'date' },
+        { name: 'lieuNaissance', label: langue === 'en' ? 'Place of birth' : 'Lieu de naissance', type: 'text' },
+        { name: 'nomPere', label: langue === 'en' ? "Father's name" : 'Nom du père', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Applicant's NIC", "Birth certificate", "Father's NIC"] :
+      documents: langue === 'en' ? ["Applicant's NIC", "Birth certificate", "Father's NIC"] :
         ["CNI du demandeur", "Acte de naissance", "CNI du père"],
     },
     AUTORISATION_PARENTALE: {
       label: t.autoParentale, Icon: Users, couleur: 'bg-indigo-500',
       champs: [
-        { name: 'nomEnfant', label: t.langue === 'en' ? "Child's full name" : "Nom complet de l'enfant", type: 'text' },
-        { name: 'dateNaissanceEnfant', label: t.langue === 'en' ? "Child's date of birth" : "Date de naissance de l'enfant", type: 'date' },
-        { name: 'nomParent', label: t.langue === 'en' ? 'Parent/guardian name' : 'Nom du parent/tuteur', type: 'text' },
-        { name: 'motif', label: t.langue === 'en' ? 'Purpose of authorization' : "Motif de l'autorisation", type: 'text' },
-        { name: 'destination', label: t.langue === 'en' ? 'Destination / Purpose' : 'Destination / Objet', type: 'text' },
+        { name: 'nomEnfant', label: langue === 'en' ? "Child's full name" : "Nom complet de l'enfant", type: 'text' },
+        { name: 'dateNaissanceEnfant', label: langue === 'en' ? "Child's date of birth" : "Date de naissance de l'enfant", type: 'date' },
+        { name: 'nomParent', label: langue === 'en' ? 'Parent/guardian name' : 'Nom du parent/tuteur', type: 'text' },
+        { name: 'motif', label: langue === 'en' ? 'Purpose' : "Motif de l'autorisation", type: 'text' },
+        { name: 'destination', label: langue === 'en' ? 'Destination / Purpose' : 'Destination / Objet', type: 'text' },
       ],
-      documents: t.langue === 'en' ? ["Parent/guardian NIC", "Child's birth certificate"] :
+      documents: langue === 'en' ? ["Parent/guardian NIC", "Child's birth certificate"] :
         ["CNI du parent/tuteur", "Acte de naissance de l'enfant"],
     },
   };
@@ -138,12 +131,11 @@ export default function Demande() {
   const [formData, setFormData] = useState({});
   const [erreursChamps, setEreursChamps] = useState({});
   const [fichiers, setFichiers] = useState({});
+  const [erreursDocuments, setEreursDocuments] = useState({});
   const [erreur, setErreur] = useState('');
   const [chargement, setChargement] = useState(false);
   const [succes, setSucces] = useState(false);
   const [codeUnique, setCodeUnique] = useState('');
-  const [erreursDocuments, setEreursDocuments] = useState({});
-  const { langue } = useLangue();
 
   const config = ACTES_CONFIG[typeActe];
 
@@ -155,16 +147,18 @@ export default function Demande() {
   };
 
   const handleFichier = (index, cote, file) => {
-    if (file) setFichiers(prev => ({
-      ...prev,
-      [index]: { ...prev[index], [cote]: file }
-    }));
-    if (erreursDocuments[index]) {
-      setEreursDocuments(prev => ({ ...prev, [index]: '' }));
+    if (file) {
+      setFichiers(prev => ({
+        ...prev,
+        [index]: { ...prev[index], [cote]: file }
+      }));
+      if (erreursDocuments[index]) {
+        setEreursDocuments(prev => ({ ...prev, [index]: '' }));
+      }
     }
   };
 
-   const supprimerFichier = (index, cote) => {
+  const supprimerFichier = (index, cote) => {
     setFichiers(prev => {
       const copy = { ...prev };
       if (copy[index]) {
@@ -175,13 +169,28 @@ export default function Demande() {
     });
   };
 
-jsx  const handleSubmit = async () => {
-    // Vérifier que tous les documents ont recto ET verso
+  const validerEtape2 = () => {
+    const erreurs = {};
+    config.champs.forEach(champ => {
+      const valeur = formData[champ.name];
+      if (!valeur || valeur.toString().trim() === '') {
+        erreurs[champ.name] = t.champObligatoire;
+      }
+    });
+    if (Object.keys(erreurs).length > 0) {
+      setEreursChamps(erreurs);
+      return false;
+    }
+    setEreursChamps({});
+    return true;
+  };
+
+  const handleSubmit = async () => {
     const erreurs = {};
     config.documents.forEach((doc, i) => {
       if (!fichiers[i]?.recto && !fichiers[i]?.verso) {
         erreurs[i] = langue === 'en'
-          ? 'Please provide the front and back of this document'
+          ? 'Please provide the front (Recto) and back (Verso) of this document'
           : 'Veuillez fournir le recto et le verso de ce document';
       } else if (!fichiers[i]?.recto) {
         erreurs[i] = langue === 'en'
@@ -227,23 +236,6 @@ jsx  const handleSubmit = async () => {
       setChargement(false);
     }
   };
-
-  const validerEtape2 = () => {
-    const erreurs = {};
-    config.champs.forEach(champ => {
-      const valeur = formData[champ.name];
-      if (!valeur || valeur.toString().trim() === '') {
-        erreurs[champ.name] = t.champObligatoire;
-      }
-    });
-    if (Object.keys(erreurs).length > 0) {
-      setEreursChamps(erreurs);
-      return false;
-    }
-    setEreursChamps({});
-    return true;
-  };
-
 
   if (!utilisateur) { navigate('/connexion'); return null; }
 
@@ -298,7 +290,7 @@ jsx  const handleSubmit = async () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6">
-          {/* ÉTAPE 1 */}
+
           {etape === 1 && (
             <>
               <h2 className="text-xl font-bold text-gray-800 mb-4">{t.choisirActe}</h2>
@@ -325,7 +317,6 @@ jsx  const handleSubmit = async () => {
             </>
           )}
 
-          {/* ÉTAPE 2 */}
           {etape === 2 && config && (
             <>
               <div className="flex items-center gap-3 mb-4">
@@ -352,7 +343,7 @@ jsx  const handleSubmit = async () => {
                       <select name={champ.name} value={formData[champ.name] || ''} onChange={handleChamp}
                         className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition
                           ${erreursChamps[champ.name] ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}>
-                        <option value="">{t.langue === 'en' ? 'Select...' : 'Sélectionner...'}</option>
+                        <option value="">{langue === 'en' ? 'Select...' : 'Sélectionner...'}</option>
                         {champ.options.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     ) : (
@@ -383,49 +374,47 @@ jsx  const handleSubmit = async () => {
             </>
           )}
 
-          {/* ÉTAPE 3 */}
           {etape === 3 && config && (
             <>
               <h2 className="text-xl font-bold text-gray-800 mb-2">{t.documentsAFournir}</h2>
               <p className="text-gray-500 text-sm mb-5">{t.scannerPhotographier}</p>
 
-              <div className="space-y-4 mb-6">
+              <div className="space-y-5 mb-6">
                 {config.documents.map((doc, i) => (
                   <div key={i} className={`border-2 rounded-xl p-4 transition
                     ${erreursDocuments[i] ? 'border-red-300 bg-red-50' :
-                      fichiers[i]?.recto || fichiers[i]?.verso ? 'border-green-300 bg-green-50' :
+                      (fichiers[i]?.recto && fichiers[i]?.verso) ? 'border-green-300 bg-green-50' :
                       'border-gray-200 bg-white'}`}>
 
-                    {/* Titre du document */}
                     <div className="flex items-center gap-2 mb-3">
                       <FileCheck size={16} className="text-green-600 flex-shrink-0" />
                       <span className="text-sm font-semibold text-gray-800">{doc}</span>
-                      <span className="text-red-500 text-xs ml-1">*</span>
+                      <span className="text-red-500 text-xs">*</span>
                       {(fichiers[i]?.recto && fichiers[i]?.verso) && (
                         <span className="ml-auto flex items-center gap-1 text-green-600 text-xs font-semibold">
                           <CheckCircle size={13} /> {langue === 'en' ? 'Complete' : 'Complet'}
                         </span>
                       )}
                       {(fichiers[i]?.recto || fichiers[i]?.verso) && !(fichiers[i]?.recto && fichiers[i]?.verso) && (
-                        <span className="ml-auto flex items-center gap-1 text-yellow-600 text-xs font-semibold">
+                        <span className="ml-auto text-yellow-600 text-xs font-semibold">
                           {langue === 'en' ? 'Partial' : 'Partiel'}
                         </span>
                       )}
                     </div>
 
-                    {/* Recto */}
+                    {/* RECTO */}
                     <div className="mb-3">
-                      <p className="text-xs font-medium text-gray-600 mb-1.5">
+                      <p className="text-xs font-semibold text-gray-600 mb-1.5">
                         {langue === 'en' ? 'Front side (Recto)' : 'Face avant (Recto)'} <span className="text-red-500">*</span>
                       </p>
                       {fichiers[i]?.recto ? (
                         <div className="flex items-center justify-between bg-white border border-green-200 rounded-xl px-3 py-2">
                           <div className="flex items-center gap-2">
                             <CheckCircle size={14} className="text-green-600" />
-                            <span className="text-xs text-gray-600 truncate max-w-48">{fichiers[i].recto.name}</span>
+                            <span className="text-xs text-gray-600 truncate max-w-xs">{fichiers[i].recto.name}</span>
                           </div>
                           <button onClick={() => supprimerFichier(i, 'recto')}
-                            className="text-red-500 text-xs hover:text-red-700 ml-2 font-medium">
+                            className="text-red-500 text-xs hover:text-red-700 ml-2 font-medium flex-shrink-0">
                             {langue === 'en' ? 'Remove' : 'Supprimer'}
                           </button>
                         </div>
@@ -451,19 +440,19 @@ jsx  const handleSubmit = async () => {
                       )}
                     </div>
 
-                    {/* Verso */}
+                    {/* VERSO */}
                     <div>
-                      <p className="text-xs font-medium text-gray-600 mb-1.5">
+                      <p className="text-xs font-semibold text-gray-600 mb-1.5">
                         {langue === 'en' ? 'Back side (Verso)' : 'Face arrière (Verso)'} <span className="text-red-500">*</span>
                       </p>
                       {fichiers[i]?.verso ? (
                         <div className="flex items-center justify-between bg-white border border-green-200 rounded-xl px-3 py-2">
                           <div className="flex items-center gap-2">
                             <CheckCircle size={14} className="text-green-600" />
-                            <span className="text-xs text-gray-600 truncate max-w-48">{fichiers[i].verso.name}</span>
+                            <span className="text-xs text-gray-600 truncate max-w-xs">{fichiers[i].verso.name}</span>
                           </div>
                           <button onClick={() => supprimerFichier(i, 'verso')}
-                            className="text-red-500 text-xs hover:text-red-700 ml-2 font-medium">
+                            className="text-red-500 text-xs hover:text-red-700 ml-2 font-medium flex-shrink-0">
                             {langue === 'en' ? 'Remove' : 'Supprimer'}
                           </button>
                         </div>
@@ -489,10 +478,9 @@ jsx  const handleSubmit = async () => {
                       )}
                     </div>
 
-                    {/* Erreur document */}
                     {erreursDocuments[i] && (
-                      <div className="flex items-center gap-1 mt-2">
-                        <AlertCircle size={13} className="text-red-500" />
+                      <div className="flex items-center gap-1 mt-3">
+                        <AlertCircle size={13} className="text-red-500 flex-shrink-0" />
                         <p className="text-red-500 text-xs">{erreursDocuments[i]}</p>
                       </div>
                     )}
@@ -523,7 +511,6 @@ jsx  const handleSubmit = async () => {
               </div>
             </>
           )}
-
         </div>
       </div>
     </div>
