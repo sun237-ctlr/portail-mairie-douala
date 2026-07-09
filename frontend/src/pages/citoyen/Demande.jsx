@@ -142,6 +142,8 @@ export default function Demande() {
   const [chargement, setChargement] = useState(false);
   const [succes, setSucces] = useState(false);
   const [codeUnique, setCodeUnique] = useState('');
+  const [erreursDocuments, setEreursDocuments] = useState({});
+  const { langue } = useLangue();
 
   const config = ACTES_CONFIG[typeActe];
 
@@ -152,12 +154,78 @@ export default function Demande() {
     }
   };
 
-  const handleFichier = (index, file) => {
-    if (file) setFichiers(prev => ({ ...prev, [index]: file }));
+  const handleFichier = (index, cote, file) => {
+    if (file) setFichiers(prev => ({
+      ...prev,
+      [index]: { ...prev[index], [cote]: file }
+    }));
+    if (erreursDocuments[index]) {
+      setEreursDocuments(prev => ({ ...prev, [index]: '' }));
+    }
   };
 
-  const supprimerFichier = (index) => {
-    setFichiers(prev => { const c = { ...prev }; delete c[index]; return c; });
+   const supprimerFichier = (index, cote) => {
+    setFichiers(prev => {
+      const copy = { ...prev };
+      if (copy[index]) {
+        delete copy[index][cote];
+        if (Object.keys(copy[index]).length === 0) delete copy[index];
+      }
+      return copy;
+    });
+  };
+
+jsx  const handleSubmit = async () => {
+    // Vérifier que tous les documents ont recto ET verso
+    const erreurs = {};
+    config.documents.forEach((doc, i) => {
+      if (!fichiers[i]?.recto && !fichiers[i]?.verso) {
+        erreurs[i] = langue === 'en'
+          ? 'Please provide the front and back of this document'
+          : 'Veuillez fournir le recto et le verso de ce document';
+      } else if (!fichiers[i]?.recto) {
+        erreurs[i] = langue === 'en'
+          ? 'Please provide the front side (Recto)'
+          : 'Veuillez fournir la face avant (Recto)';
+      } else if (!fichiers[i]?.verso) {
+        erreurs[i] = langue === 'en'
+          ? 'Please provide the back side (Verso)'
+          : 'Veuillez fournir la face arrière (Verso)';
+      }
+    });
+
+    if (Object.keys(erreurs).length > 0) {
+      setEreursDocuments(erreurs);
+      return;
+    }
+
+    setErreur('');
+    setChargement(true);
+    try {
+      const res = await creerDemande({ typeActe, donnees: formData });
+      const demandeId = res.data.demande.id;
+      const code = res.data.demande.codeUnique;
+
+      const fd = new FormData();
+      config.documents.forEach((doc, i) => {
+        if (fichiers[i]?.recto) {
+          fd.append('documents', fichiers[i].recto);
+          fd.append('noms', `${doc} - Recto`);
+        }
+        if (fichiers[i]?.verso) {
+          fd.append('documents', fichiers[i].verso);
+          fd.append('noms', `${doc} - Verso`);
+        }
+      });
+      await uploadDocuments(demandeId, fd);
+
+      setCodeUnique(code);
+      setSucces(true);
+    } catch (err) {
+      setErreur(err.response?.data?.message || 'Erreur lors de la soumission');
+    } finally {
+      setChargement(false);
+    }
   };
 
   const validerEtape2 = () => {
@@ -176,32 +244,6 @@ export default function Demande() {
     return true;
   };
 
-  const handleSubmit = async () => {
-    setErreur('');
-    setChargement(true);
-    try {
-      const res = await creerDemande({ typeActe, donnees: formData });
-      const demandeId = res.data.demande.id;
-      const code = res.data.demande.codeUnique;
-
-      const fichiersListe = Object.entries(fichiers);
-      if (fichiersListe.length > 0) {
-        const fd = new FormData();
-        fichiersListe.forEach(([index, file]) => {
-          fd.append('documents', file);
-          fd.append('noms', config.documents[index]);
-        });
-        await uploadDocuments(demandeId, fd);
-      }
-
-      setCodeUnique(code);
-      setSucces(true);
-    } catch (err) {
-      setErreur(err.response?.data?.message || 'Erreur lors de la soumission');
-    } finally {
-      setChargement(false);
-    }
-  };
 
   if (!utilisateur) { navigate('/connexion'); return null; }
 
@@ -349,41 +391,109 @@ export default function Demande() {
 
               <div className="space-y-4 mb-6">
                 {config.documents.map((doc, i) => (
-                  <div key={i} className="border border-gray-200 rounded-xl p-4">
+                  <div key={i} className={`border-2 rounded-xl p-4 transition
+                    ${erreursDocuments[i] ? 'border-red-300 bg-red-50' :
+                      fichiers[i]?.recto || fichiers[i]?.verso ? 'border-green-300 bg-green-50' :
+                      'border-gray-200 bg-white'}`}>
+
+                    {/* Titre du document */}
                     <div className="flex items-center gap-2 mb-3">
                       <FileCheck size={16} className="text-green-600 flex-shrink-0" />
-                      <span className="text-sm font-medium text-gray-700">{doc}</span>
-                      {fichiers[i] && (
+                      <span className="text-sm font-semibold text-gray-800">{doc}</span>
+                      <span className="text-red-500 text-xs ml-1">*</span>
+                      {(fichiers[i]?.recto && fichiers[i]?.verso) && (
                         <span className="ml-auto flex items-center gap-1 text-green-600 text-xs font-semibold">
-                          <CheckCircle size={13} /> {t.langue === 'en' ? 'Added' : 'Ajouté'}
+                          <CheckCircle size={13} /> {langue === 'en' ? 'Complete' : 'Complet'}
+                        </span>
+                      )}
+                      {(fichiers[i]?.recto || fichiers[i]?.verso) && !(fichiers[i]?.recto && fichiers[i]?.verso) && (
+                        <span className="ml-auto flex items-center gap-1 text-yellow-600 text-xs font-semibold">
+                          {langue === 'en' ? 'Partial' : 'Partiel'}
                         </span>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <label className="flex-1 cursor-pointer">
-                        <div className="flex items-center justify-center gap-2 border-2 border-dashed border-blue-200 bg-blue-50 rounded-xl py-2.5 px-3 hover:bg-blue-100 transition">
-                          <Camera size={16} className="text-blue-600" />
-                          <span className="text-xs text-blue-700 font-medium">{t.prendrePhoto}</span>
+
+                    {/* Recto */}
+                    <div className="mb-3">
+                      <p className="text-xs font-medium text-gray-600 mb-1.5">
+                        {langue === 'en' ? 'Front side (Recto)' : 'Face avant (Recto)'} <span className="text-red-500">*</span>
+                      </p>
+                      {fichiers[i]?.recto ? (
+                        <div className="flex items-center justify-between bg-white border border-green-200 rounded-xl px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle size={14} className="text-green-600" />
+                            <span className="text-xs text-gray-600 truncate max-w-48">{fichiers[i].recto.name}</span>
+                          </div>
+                          <button onClick={() => supprimerFichier(i, 'recto')}
+                            className="text-red-500 text-xs hover:text-red-700 ml-2 font-medium">
+                            {langue === 'en' ? 'Remove' : 'Supprimer'}
+                          </button>
                         </div>
-                        <input type="file" accept="image/*" capture="environment" className="hidden"
-                          onChange={(e) => handleFichier(i, e.target.files[0])} />
-                      </label>
-                      <label className="flex-1 cursor-pointer">
-                        <div className="flex items-center justify-center gap-2 border-2 border-dashed border-green-200 bg-green-50 rounded-xl py-2.5 px-3 hover:bg-green-100 transition">
-                          <Folder size={16} className="text-green-600" />
-                          <span className="text-xs text-green-700 font-medium">{t.scannerPDF}</span>
+                      ) : (
+                        <div className="flex gap-2">
+                          <label className="flex-1 cursor-pointer">
+                            <div className="flex items-center justify-center gap-2 border-2 border-dashed border-blue-200 bg-blue-50 rounded-xl py-2 px-3 hover:bg-blue-100 transition">
+                              <Camera size={15} className="text-blue-600" />
+                              <span className="text-xs text-blue-700 font-medium">{t.prendrePhoto}</span>
+                            </div>
+                            <input type="file" accept="image/*" capture="environment" className="hidden"
+                              onChange={(e) => handleFichier(i, 'recto', e.target.files[0])} />
+                          </label>
+                          <label className="flex-1 cursor-pointer">
+                            <div className="flex items-center justify-center gap-2 border-2 border-dashed border-green-200 bg-green-50 rounded-xl py-2 px-3 hover:bg-green-100 transition">
+                              <Folder size={15} className="text-green-600" />
+                              <span className="text-xs text-green-700 font-medium">{t.scannerPDF}</span>
+                            </div>
+                            <input type="file" accept="image/*,application/pdf" className="hidden"
+                              onChange={(e) => handleFichier(i, 'recto', e.target.files[0])} />
+                          </label>
                         </div>
-                        <input type="file" accept="image/*,application/pdf" className="hidden"
-                          onChange={(e) => handleFichier(i, e.target.files[0])} />
-                      </label>
+                      )}
                     </div>
-                    {fichiers[i] && (
-                      <div className="mt-2 flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
-                        <span className="text-xs text-gray-600 truncate">{fichiers[i].name}</span>
-                        <button onClick={() => supprimerFichier(i)}
-                          className="text-red-500 text-xs ml-2 hover:text-red-700">
-                          {t.langue === 'en' ? 'Remove' : 'Supprimer'}
-                        </button>
+
+                    {/* Verso */}
+                    <div>
+                      <p className="text-xs font-medium text-gray-600 mb-1.5">
+                        {langue === 'en' ? 'Back side (Verso)' : 'Face arrière (Verso)'} <span className="text-red-500">*</span>
+                      </p>
+                      {fichiers[i]?.verso ? (
+                        <div className="flex items-center justify-between bg-white border border-green-200 rounded-xl px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle size={14} className="text-green-600" />
+                            <span className="text-xs text-gray-600 truncate max-w-48">{fichiers[i].verso.name}</span>
+                          </div>
+                          <button onClick={() => supprimerFichier(i, 'verso')}
+                            className="text-red-500 text-xs hover:text-red-700 ml-2 font-medium">
+                            {langue === 'en' ? 'Remove' : 'Supprimer'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <label className="flex-1 cursor-pointer">
+                            <div className="flex items-center justify-center gap-2 border-2 border-dashed border-blue-200 bg-blue-50 rounded-xl py-2 px-3 hover:bg-blue-100 transition">
+                              <Camera size={15} className="text-blue-600" />
+                              <span className="text-xs text-blue-700 font-medium">{t.prendrePhoto}</span>
+                            </div>
+                            <input type="file" accept="image/*" capture="environment" className="hidden"
+                              onChange={(e) => handleFichier(i, 'verso', e.target.files[0])} />
+                          </label>
+                          <label className="flex-1 cursor-pointer">
+                            <div className="flex items-center justify-center gap-2 border-2 border-dashed border-green-200 bg-green-50 rounded-xl py-2 px-3 hover:bg-green-100 transition">
+                              <Folder size={15} className="text-green-600" />
+                              <span className="text-xs text-green-700 font-medium">{t.scannerPDF}</span>
+                            </div>
+                            <input type="file" accept="image/*,application/pdf" className="hidden"
+                              onChange={(e) => handleFichier(i, 'verso', e.target.files[0])} />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Erreur document */}
+                    {erreursDocuments[i] && (
+                      <div className="flex items-center gap-1 mt-2">
+                        <AlertCircle size={13} className="text-red-500" />
+                        <p className="text-red-500 text-xs">{erreursDocuments[i]}</p>
                       </div>
                     )}
                   </div>
@@ -413,6 +523,7 @@ export default function Demande() {
               </div>
             </>
           )}
+
         </div>
       </div>
     </div>
