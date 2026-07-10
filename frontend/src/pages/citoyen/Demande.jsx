@@ -136,6 +136,8 @@ export default function Demande() {
   const [chargement, setChargement] = useState(false);
   const [succes, setSucces] = useState(false);
   const [codeUnique, setCodeUnique] = useState('');
+  const [arrondissement, setArrondissement] = useState('');
+  const [erreurArrondissement, setErreurArrondissement] = useState('');  
 
   const config = ACTES_CONFIG[typeActe];
 
@@ -211,7 +213,8 @@ export default function Demande() {
     setErreur('');
     setChargement(true);
     try {
-      const res = await creerDemande({ typeActe, donnees: formData });
+      
+      const res = await creerDemande({ typeActe, donnees: { ...formData, arrondissement } });
       const demandeId = res.data.demande.id;
       const code = res.data.demande.codeUnique;
 
@@ -291,9 +294,52 @@ export default function Demande() {
 
         <div className="bg-white rounded-2xl shadow-sm p-6">
 
-          {etape === 1 && (
+        {etape === 1 && (
             <>
               <h2 className="text-xl font-bold text-gray-800 mb-4">{t.choisirActe}</h2>
+
+              {/* Choix de l'arrondissement */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {langue === 'en' ? 'Select your district' : 'Choisissez votre arrondissement'} <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {[
+                    { id: 'douala1', label: 'Douala 1er', desc: langue === 'en' ? 'Wouri' : 'Wouri' },
+                    { id: 'douala2', label: 'Douala 2e', desc: langue === 'en' ? 'Nouvelle-Deïdo' : 'Nouvelle-Deïdo' },
+                    { id: 'douala3', label: 'Douala 3e', desc: langue === 'en' ? 'Nylon' : 'Nylon' },
+                    { id: 'douala4', label: 'Douala 4e', desc: langue === 'en' ? 'Bonabéri' : 'Bonabéri' },
+                    { id: 'douala5', label: 'Douala 5e', desc: langue === 'en' ? 'Kotto' : 'Kotto' },
+                    { id: 'douala6', label: 'Douala 6e', desc: langue === 'en' ? 'Bassa' : 'Bassa' },
+                  ].map((arr) => (
+                    <button key={arr.id} onClick={() => setArrondissement(arr.id)}
+                      className={`p-3 rounded-xl border-2 text-left transition
+                        ${arrondissement === arr.id ? 'border-green-600 bg-green-50' : 'border-gray-100 hover:border-green-300'}`}>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className={arrondissement === arr.id ? 'text-green-600' : 'text-gray-400'} />
+                        <div>
+                          <p className="text-xs font-bold text-gray-800">{arr.label}</p>
+                          <p className="text-xs text-gray-500">{arr.desc}</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {erreurArrondissement && (
+                  <div className="flex items-center gap-1 mt-2">
+                    <AlertCircle size={13} className="text-red-500" />
+                    <p className="text-red-500 text-xs">{erreurArrondissement}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Séparateur */}
+              <div className="border-t border-gray-100 mb-5" />
+
+              {/* Choix de l'acte */}
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                {langue === 'en' ? 'Select the document type' : 'Choisissez le type d\'acte'} <span className="text-red-500">*</span>
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 {Object.entries(ACTES_CONFIG).map(([key, val]) => {
                   const IconActe = val.Icon;
@@ -309,13 +355,23 @@ export default function Demande() {
                   );
                 })}
               </div>
-              <button onClick={() => { if (typeActe) setEtape(2); }}
-                disabled={!typeActe}
+
+              <button onClick={() => {
+                if (!arrondissement) {
+                  setErreurArrondissement(langue === 'en' ? 'Please select a district' : 'Veuillez choisir un arrondissement');
+                  return;
+                }
+                if (!typeActe) return;
+                setErreurArrondissement('');
+                setEtape(2);
+              }}
+                disabled={!typeActe || !arrondissement}
                 className="w-full mt-6 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
                 {t.continuer}
               </button>
             </>
           )}
+
 
           {etape === 2 && config && (
             <>
