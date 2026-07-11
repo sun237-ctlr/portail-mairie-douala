@@ -40,7 +40,6 @@ model Demande {
   typeActe          String
   statut            String      @default("EN_ATTENTE")
   donnees           Json
-  codeUnique        String    @unique
   raisonRejet       String?
   dateRendezVous    DateTime?
   dateDisponibilite DateTime?

@@ -5,17 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import AssistantIA from '../../components/AssistantIA';
 import Navbar from '../../components/Navbar';
 import { useLangue } from '../../context/LangueContext';
-import BoutonLangue from '../../components/BoutonLangue';
-import { FileText, PlusCircle, Clock, CheckCircle, XCircle, Search, SlidersHorizontal, Download, Calendar } from 'lucide-react';
-
-const statutConfig = {
-  EN_ATTENTE: { label: 'En attente', couleur: 'bg-yellow-100 text-yellow-700', Icon: Clock },
-  VERIFICATION_EN_COURS: { label: 'En traitement', couleur: 'bg-blue-100 text-blue-700', Icon: Clock },
-  ACCEPTE: { label: 'Terminée', couleur: 'bg-green-100 text-green-700', Icon: CheckCircle },
-  REJETE: { label: 'Rejetée', couleur: 'bg-red-100 text-red-700', Icon: XCircle },
-  RENDEZ_VOUS_PROGRAMME: { label: 'RDV programmé', couleur: 'bg-purple-100 text-purple-700', Icon: Calendar },
-  ACTE_DISPONIBLE: { label: 'Disponible', couleur: 'bg-teal-100 text-teal-700', Icon: CheckCircle },
-};
+import { FileText, PlusCircle, Clock, CheckCircle, XCircle, Search, SlidersHorizontal, Calendar } from 'lucide-react';
 
 export default function Dashboard() {
   const { utilisateur } = useAuth();

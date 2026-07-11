@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { Lock, Eye, EyeOff, FileText, CheckCircle } from 'lucide-react';
 import API from '../../services/api';
 
 export default function ReinitialisationMotDePasse() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const token = searchParams.get('token');
   const [motDePasse, setMotDePasse] = useState('');
   const [confirmation, setConfirmation] = useState('');

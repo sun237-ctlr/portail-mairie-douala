@@ -17,12 +17,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginCitoyen = (token, user) => {
+    localStorage.removeItem('admin');
     localStorage.setItem('token', token);
     localStorage.setItem('utilisateur', JSON.stringify(user));
     setUtilisateur(user);
   };
 
   const loginAdmin = (token, adminData) => {
+    localStorage.removeItem('utilisateur');
     localStorage.setItem('token', token);
     localStorage.setItem('admin', JSON.stringify(adminData));
     setAdmin(adminData);

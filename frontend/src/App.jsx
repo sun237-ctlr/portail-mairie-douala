@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LangueProvider } from './context/LangueContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import Accueil from './pages/Accueil';
 import Inscription from './pages/citoyen/Inscription';
 import Connexion from './pages/citoyen/Connexion';
@@ -30,7 +31,7 @@ function App() {
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/demande" element={<ProtectedRoute><Demande /></ProtectedRoute>} />
             <Route path="/admin/connexion" element={<ConnexionAdmin />} />
-            <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+            <Route path="/admin/dashboard" element={<ProtectedAdminRoute><DashboardAdmin /></ProtectedAdminRoute>} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

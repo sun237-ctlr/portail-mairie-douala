@@ -2,13 +2,16 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const { PrismaClient } = require("@prisma/client");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 
 const prisma = new PrismaClient();
+const uploadsDir = path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, "../../uploads"));
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, unique + path.extname(file.originalname));
@@ -19,8 +22,10 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|pdf/;
-    const ok = allowed.test(path.extname(file.originalname).toLowerCase());
+    const allowedExtensions = new Set(['.jpeg', '.jpg', '.png', '.pdf']);
+    const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'application/pdf']);
+    const ok = allowedExtensions.has(path.extname(file.originalname).toLowerCase())
+      && allowedMimeTypes.has(file.mimetype);
     ok ? cb(null, true) : cb(new Error("Format non supporté"));
   },
 });

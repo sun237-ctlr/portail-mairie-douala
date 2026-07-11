@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import API from '../services/api';
 import { MessageCircle, X, Send, Bot } from 'lucide-react';
 
 export default function AssistantIA() {
@@ -23,7 +23,7 @@ export default function AssistantIA() {
     setInput('');
     setChargement(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/ia/chat', { messages: nouveauxMessages });
+      const res = await API.post('/ia/chat', { messages: nouveauxMessages });
       setMessages([...nouveauxMessages, { role: 'assistant', content: res.data.message }]);
     } catch {
       setMessages([...nouveauxMessages, { role: 'assistant', content: 'Désolé, une erreur est survenue.' }]);

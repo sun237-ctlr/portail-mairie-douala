@@ -101,9 +101,12 @@ router.get('/verifier/:code', async (req, res) => {
 // Détail d'une demande par ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const demande = await prisma.demande.findUnique({
-      where: { id: req.params.id },
-      include: { documents: true, utilisateur: true }
+    const demande = await prisma.demande.findFirst({
+      where: { id: req.params.id, utilisateurId: req.utilisateur.id },
+      include: {
+        documents: true,
+        utilisateur: { select: { id: true, nom: true, prenom: true, email: true } }
+      }
     });
     if (!demande) return res.status(404).json({ message: 'Demande non trouvée' });
     res.json({ demande });

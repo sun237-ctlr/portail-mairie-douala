@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDemandesAdmin, accepterDemande, rejeterDemande } from '../../services/api';
+import { getDemandesAdmin, accepterDemande, rejeterDemande, API_ORIGIN } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import {
   FileText, LogOut, CheckCircle, XCircle, Clock,
@@ -239,7 +239,7 @@ export default function DashboardAdmin() {
                                         <p className="text-xs text-gray-500">{doc.type} • {(new Date(doc.createdAt)).toLocaleDateString('fr-FR')}</p>
                                       </div>
                                     </div>
-                                    <a href={`http://localhost:5000${doc.url}`} target="_blank" rel="noopener noreferrer"
+                                    <a href={`${API_ORIGIN}${doc.url}`} target="_blank" rel="noopener noreferrer"
                                       className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition flex items-center gap-1">
                                       <FileText size={12} /> Voir
                                     </a>

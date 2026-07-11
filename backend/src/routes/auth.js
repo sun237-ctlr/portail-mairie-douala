@@ -4,13 +4,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { PrismaClient } = require('@prisma/client');
 const { verifierCNI } = require('../utils/verificationCNI');
 
 const prisma = new PrismaClient();
+const uploadsDir = path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'));
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, unique + path.extname(file.originalname));
@@ -21,8 +24,10 @@ const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|pdf/;
-    const ok = allowed.test(path.extname(file.originalname).toLowerCase());
+    const allowedExtensions = new Set(['.jpeg', '.jpg', '.png', '.pdf']);
+    const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'application/pdf']);
+    const ok = allowedExtensions.has(path.extname(file.originalname).toLowerCase())
+      && allowedMimeTypes.has(file.mimetype);
     ok ? cb(null, true) : cb(new Error('Format non supporté'));
   }
 });
@@ -33,10 +38,15 @@ router.post('/inscription', upload.fields([
   { name: 'cniVerso', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { nom, prenom, email, motDePasse, telephone } = req.body;
+    const { nom, prenom, motDePasse, telephone } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
 
     if (!nom || !prenom || !email || !motDePasse) {
       return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis' });
+    }
+
+    if (motDePasse.length < 8) {
+      return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères' });
     }
 
     if (!req.files?.cniRecto || !req.files?.cniVerso) {
@@ -49,8 +59,8 @@ router.post('/inscription', upload.fields([
     }
 
     // Vérification CNI par IA
-    const cheminRecto = `uploads/${req.files.cniRecto[0].filename}`;
-    const cheminVerso = `uploads/${req.files.cniVerso[0].filename}`;
+    const cheminRecto = req.files.cniRecto[0].path;
+    const cheminVerso = req.files.cniVerso[0].path;
 
     const verifRecto = await verifierCNI(cheminRecto);
     if (!verifRecto.valide) {
@@ -69,8 +79,8 @@ router.post('/inscription', upload.fields([
         nom, prenom, email,
         motDePasse: motDePasseHash,
         telephone,
-        cniRecto: `/${cheminRecto}`,
-        cniVerso: `/${cheminVerso}`,
+        cniRecto: `/uploads/${req.files.cniRecto[0].filename}`,
+        cniVerso: `/uploads/${req.files.cniVerso[0].filename}`,
       }
     });
 
@@ -94,7 +104,9 @@ router.post('/inscription', upload.fields([
 // Connexion citoyen
 router.post('/connexion', async (req, res) => {
   try {
-    const { email, motDePasse } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    const { motDePasse } = req.body;
+    if (!email || !motDePasse) return res.status(400).json({ message: 'Email et mot de passe obligatoires' });
     const utilisateur = await prisma.utilisateur.findUnique({ where: { email } });
 
     if (!utilisateur || !await bcrypt.compare(motDePasse, utilisateur.motDePasse)) {
@@ -146,7 +158,8 @@ router.post('/admin/connexion', async (req, res) => {
 // Mot de passe oublié
 router.post('/mot-de-passe-oublie', async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    if (!email) return res.status(400).json({ message: 'Email obligatoire' });
     const utilisateur = await prisma.utilisateur.findUnique({ where: { email } });
     if (!utilisateur) {
       return res.json({ message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
@@ -156,7 +169,7 @@ router.post('/mot-de-passe-oublie', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-    const lien = `${process.env.FRONTEND_URL}/reinitialiser-mot-de-passe?token=${token}`;
+    const lien = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reinitialiser-mot-de-passe?token=${token}`;
     const { envoyerEmailReinitialisaton } = require('../utils/emailService');
     await envoyerEmailReinitialisaton(email, utilisateur.prenom, lien);
     res.json({ message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
@@ -169,6 +182,9 @@ router.post('/mot-de-passe-oublie', async (req, res) => {
 router.post('/reinitialiser-mot-de-passe', async (req, res) => {
   try {
     const { token, nouveauMotDePasse } = req.body;
+    if (!token || !nouveauMotDePasse || nouveauMotDePasse.length < 8) {
+      return res.status(400).json({ message: 'Token et mot de passe de 8 caractères minimum obligatoires' });
+    }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const hash = await bcrypt.hash(nouveauMotDePasse, 10);
     await prisma.utilisateur.update({
