@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
-const { verifierCNI } = require('../utils/verificationCNI');
 
 const prisma = new PrismaClient();
 
@@ -48,19 +47,6 @@ router.post('/inscription', upload.fields([
       return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    // Vérification CNI par IA
-    const cheminRecto = `uploads/${req.files.cniRecto[0].filename}`;
-    const cheminVerso = `uploads/${req.files.cniVerso[0].filename}`;
-
-    const verifRecto = await verifierCNI(cheminRecto);
-    if (!verifRecto.valide) {
-      return res.status(400).json({ message: `CNI Recto : ${verifRecto.message}` });
-    }
-
-    const verifVerso = await verifierCNI(cheminVerso);
-    if (!verifVerso.valide) {
-      return res.status(400).json({ message: `CNI Verso : ${verifVerso.message}` });
-    }
 
     const motDePasseHash = await bcrypt.hash(motDePasse, 10);
 
